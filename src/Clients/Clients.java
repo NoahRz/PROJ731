@@ -14,7 +14,7 @@ public class Clients {
                 System.out.println("chaine renvoyee = " + new String(s));
             }
 
-        } catch (NotBoundException | IOException e) {
+        } catch (NotBoundException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

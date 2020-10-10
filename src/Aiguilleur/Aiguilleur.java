@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
@@ -19,10 +20,16 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
         this.leRegistre = r;
     }
 
+    private void voirRegistre() throws RemoteException {
+        System.out.println("====================================");
+        for(String i : this.leRegistre.list()){
+            System.out.println(i);
+        }
+    }
     @Override
-    public byte[] lecture(String nom) throws IOException, NotBoundException {
+    public byte[] lecture(String nom) throws IOException, NotBoundException, InterruptedException {
+//        this.voirRegistre();
         String mach = this.aTourDeRole();
-        System.out.println(mach);
         Remote rem = this.leRegistre.lookup(mach);
         byte[] s = null;
         if (rem instanceof Machine) {
@@ -40,7 +47,7 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
     @Override
     public boolean ajout(String url,Machine ma) throws RemoteException, AlreadyBoundException {
         try{
-            this.leRegistre.rebind(url, ma);
+            this.leRegistre.rebind("rmi://localhost:1099//"  + url, ma);
             return true;
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -62,12 +69,11 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
 
     public String aTourDeRole() throws RemoteException {
         String[] valeur = this.leRegistre.list();
-        valeur = Arrays.copyOfRange(valeur, 1, valeur.length);
+        valeur = Arrays.copyOfRange(valeur, 0, valeur.length-1);
         int longeur = valeur.length;
         int a = this.tdr%longeur;
         this.tdr++;
         return valeur[a];
-
     }
 
 

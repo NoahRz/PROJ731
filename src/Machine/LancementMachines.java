@@ -11,6 +11,5 @@ public class LancementMachines {
         m1.lancement();
         m2.lancement();
 
-        m1.deinscription();
     }
 }

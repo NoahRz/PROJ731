@@ -13,6 +13,6 @@ public interface Machine extends Remote{
      * N.B : Cette interface implémente la classe : Machine mais aussi la classe Aiguilleur
      */
 
-    public byte[] lecture(String nom) throws IOException, NotBoundException;
+    public byte[] lecture(String nom) throws IOException, NotBoundException, InterruptedException;
     public Boolean ecriture(String nom, byte[] donnees) throws IOException;
 }
