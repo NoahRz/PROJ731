@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 /**
  * The Switcher class receives requests from clients and distributes them among machines.
- * Thus it his server for client and client for machine.
+ * Thus it is server for client and client for machine.
  */
 public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private Registry registry = null;
@@ -91,17 +91,22 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         try {
 
             Registry registry = LocateRegistry.createRegistry(1099);
+            // did this because still got the error : java.rmi.UnmarshalException: error unmarshalling arguments
 
             Switcher switcher = new Switcher(registry);
 
             String url = "rmi://localhost:1099/Switcher";
             Naming.rebind(url, switcher);
 
-            System.out.println("Starting server ...");
+            System.out.println("Starting switcher ...");
         } catch (RemoteException | MalformedURLException e) {
             e.printStackTrace();
         }
     }
-
-
 }
+
+// command line (NB: have to be in the src folder):
+// javac -d destDir */*.java
+// java -classpath destDir -Djava.rmi.server.codebase=file:destDir/ Switcher/Switcher.java -> start the switcher
+// java -classpath destDir -Djava.rmi.server.codebase=file:destDir/ Machine/MachineC.java machineN -> start one machine
+// java -classpath destDir -Djava.rmi.server.codebase=file:destDir/ Client/Client.java -> start the client
