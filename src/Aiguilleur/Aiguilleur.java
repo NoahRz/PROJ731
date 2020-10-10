@@ -30,12 +30,8 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
     public byte[] lecture(String nom) throws IOException, NotBoundException, InterruptedException {
 //        this.voirRegistre();
         String mach = this.aTourDeRole();
-        Remote rem = this.leRegistre.lookup(mach);
-        byte[] s = null;
-        if (rem instanceof Machine) {
-            s = ((Machine) rem).lecture(nom);
-        }
-
+        Machine   rem = (Machine) this.leRegistre.lookup(mach);
+        byte[] s = rem.lecture(nom);
         return s;
     }
 
