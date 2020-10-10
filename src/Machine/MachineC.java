@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -14,7 +15,7 @@ public class MachineC extends UnicastRemoteObject implements Machine {
 
     @Override
     public byte[] lecture(String nom) throws IOException {
-        InputStream  lecture = new BufferedInputStream(new FileInputStream("C://Users//loicv//Documents//1. Polytech//FI4//PROJ731 - Flux de données et accès concurents//Projet//src//data//" + nom));
+        InputStream  lecture = new BufferedInputStream(new FileInputStream(".//src//data//" + nom));
         return lecture.readAllBytes();
     }
 
@@ -33,17 +34,8 @@ public class MachineC extends UnicastRemoteObject implements Machine {
         return nom;
     }
 
-//    public static void main(String[] args) throws IOException, NotBoundException, AlreadyBoundException {
-//        MachineC maM = new MachineC("m1");
-//        Remote r = Naming.lookup("rmi://localhost:1099/Aiguilleur");
-//
-//        if (r instanceof Controle) {
-//            boolean s = ((Controle) r).ajout(maM.getNom(), maM);
-//            System.out.println(s);
-//        }
-//    }
 
-        public void lancement() throws IOException, NotBoundException, AlreadyBoundException {
+    public void lancement() throws IOException, NotBoundException, AlreadyBoundException {
         MachineC maM = new MachineC(this.getNom());
         Remote r = Naming.lookup("rmi://localhost:1099/Aiguilleur");
 
@@ -51,7 +43,11 @@ public class MachineC extends UnicastRemoteObject implements Machine {
             boolean s = ((Controle) r).ajout(maM.getNom(), maM);
             System.out.println(s);
         }
-        }
+    }
 
+    public void deinscription() throws RemoteException, NotBoundException, MalformedURLException {
+        Controle r = (Controle) Naming.lookup("rmi://localhost:1099/Aiguilleur");
+        r.supprimer(this.getNom());
+    }
 
 }

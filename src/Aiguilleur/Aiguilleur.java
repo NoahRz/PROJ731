@@ -23,7 +23,7 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
     public byte[] lecture(String nom) throws IOException, NotBoundException {
         String mach = this.aTourDeRole();
         System.out.println(mach);
-        Remote rem = this.leRegistre.lookup("m1");
+        Remote rem = this.leRegistre.lookup(mach);
         byte[] s = null;
         if (rem instanceof Machine) {
             s = ((Machine) rem).lecture(nom);
@@ -50,7 +50,13 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
 
     @Override
     public boolean supprimer(String url) throws RemoteException {
-        return false;
+        try{
+            this.leRegistre.unbind(url);
+            return true;
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
