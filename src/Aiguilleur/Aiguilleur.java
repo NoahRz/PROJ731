@@ -1,3 +1,5 @@
+import jdk.dynalink.NamedOperation;
+
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
@@ -29,8 +31,9 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
     @Override
     public byte[] lecture(String nom) throws IOException, NotBoundException, InterruptedException {
 //        this.voirRegistre();
-        String mach = this.aTourDeRole();
-        Machine   rem = (Machine) this.leRegistre.lookup(mach);
+//        String mach = this.aTourDeRole();
+        String mach = this.machineEnVie();
+        Machine rem = (Machine) this.leRegistre.lookup(mach);
         byte[] s = rem.lecture(nom);
         return s;
     }
@@ -72,7 +75,20 @@ public class Aiguilleur extends UnicastRemoteObject implements Machine, Controle
         return valeur[a];
     }
 
+    public String machineEnVie() throws IOException, NotBoundException {
+        String url = this.aTourDeRole();
+        try {
+            Notification rem = (Notification) this.leRegistre.lookup(url);
+            rem.enVie();
+            return url;
+        } catch (NotBoundException | IOException e) {
+            this.leRegistre.unbind(url);
+            url = this.aTourDeRole();
+            this.machineEnVie();
+            return url;
+        }
 
+    }
 
     // ---------------------------------------------------------------------------------------------
     public static void main(String[] args) {

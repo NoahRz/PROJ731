@@ -16,3 +16,7 @@ public interface Machine extends Remote{
     public byte[] lecture(String nom) throws IOException, NotBoundException, InterruptedException;
     public Boolean ecriture(String nom, byte[] donnees) throws IOException;
 }
+
+interface Notification extends Remote{
+    Boolean enVie() throws IOException;
+}

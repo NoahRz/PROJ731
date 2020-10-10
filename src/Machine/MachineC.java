@@ -3,7 +3,7 @@ import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 
-public class MachineC extends UnicastRemoteObject implements Machine {
+public class MachineC extends UnicastRemoteObject implements Machine, Notification {
 
     String nom = null;
 
@@ -50,4 +50,8 @@ public class MachineC extends UnicastRemoteObject implements Machine {
         r.supprimer(this.getNom());
     }
 
+    @Override
+    public Boolean enVie() throws IOException {
+        return true;
+    }
 }
