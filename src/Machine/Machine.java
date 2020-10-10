@@ -7,16 +7,16 @@ import java.rmi.registry.Registry;
 
 public interface Machine extends Remote{
     /**
-     * Cette classe est l'interface pour les machines, elle a plusieurs objectifs, lire un fichier ou écrire des données
-     * @param nom :  Nom du fichier sur la machine
+     * this interface reads files and write data in files
+     * @param name : name of the file
      *
      * N.B : Cette interface implémente la classe : Machine mais aussi la classe Aiguilleur
      */
 
-    public byte[] lecture(String nom) throws IOException, NotBoundException, InterruptedException;
-    public Boolean ecriture(String nom, byte[] donnees) throws IOException;
+    public byte[] read(String name) throws IOException, NotBoundException, InterruptedException;
+    public Boolean write(String name, byte[] donnees) throws IOException;
 }
 
 interface Notification extends Remote{
-    Boolean enVie() throws IOException;
+    Boolean alive() throws IOException;
 }

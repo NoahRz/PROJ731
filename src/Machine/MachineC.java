@@ -5,24 +5,24 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class MachineC extends UnicastRemoteObject implements Machine, Notification {
 
-    String nom = null;
+    String name = null;
 
-    public MachineC(String nom) throws RemoteException {
+    public MachineC(String name) throws RemoteException {
         super();
-        this.nom = nom;
+        this.name = name;
     }
 
 
     @Override
-    public byte[] lecture(String nom) throws IOException {
-        InputStream  lecture = new BufferedInputStream(new FileInputStream(".//src//data//" + nom));
-        return lecture.readAllBytes();
+    public byte[] read(String name) throws IOException {
+        InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
+        return read.readAllBytes();
     }
 
     @Override
-    public Boolean ecriture(String nom, byte[] donnees) throws IOException {
+    public Boolean write(String name, byte[] donnees) throws IOException {
         try {
-            FileOutputStream sortie = new FileOutputStream(nom);
+            FileOutputStream sortie = new FileOutputStream(name);
             sortie.write(donnees);
             return true;
         } catch (Exception ae){
@@ -30,28 +30,27 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         }
     }
 
-    public String getNom() {
-        return nom;
+    public String getName() {
+        return name;
     }
 
 
-    public void lancement() throws IOException, NotBoundException, AlreadyBoundException {
-        MachineC maM = new MachineC(this.getNom());
-        Remote r = Naming.lookup("rmi://localhost:1099/Aiguilleur");
+    public void launch() throws IOException, NotBoundException, AlreadyBoundException {
+        Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
 
         if (r instanceof Controle) {
-            boolean s = ((Controle) r).ajout(maM.getNom(), maM);
+            boolean s = ((Controle) r).add(name, this);
             System.out.println(s);
         }
     }
 
-    public void deinscription() throws RemoteException, NotBoundException, MalformedURLException {
-        Controle r = (Controle) Naming.lookup("rmi://localhost:1099/Aiguilleur");
-        r.supprimer(this.getNom());
+    public void checkOut() throws RemoteException, NotBoundException, MalformedURLException {
+        Controle r = (Controle) Naming.lookup("rmi://localhost:1099/Switcher");
+        r.remove(this.getName());
     }
 
     @Override
-    public Boolean enVie() throws IOException {
+    public Boolean alive() throws IOException {
         return true;
     }
 }

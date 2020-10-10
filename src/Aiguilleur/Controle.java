@@ -4,6 +4,6 @@ import java.rmi.RemoteException;
 
 
 public interface Controle extends Remote{
-    public boolean ajout(String url,Machine ma) throws RemoteException, AlreadyBoundException;
-    public boolean supprimer(String url) throws RemoteException;
+    public boolean add(String url, Machine ma) throws RemoteException, AlreadyBoundException;
+    public boolean remove(String url) throws RemoteException;
 }
