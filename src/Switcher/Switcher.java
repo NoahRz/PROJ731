@@ -26,18 +26,15 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
     @Override
-    public byte[] read(String name) throws IOException, NotBoundException, InterruptedException {
-//        this.voirRegistre();
-//        String mach = this.aTourDeRole();
+    public void read(String name,String host, int port) throws IOException, NotBoundException, InterruptedException {
         String mach = this.machineAlive();
         Machine rem = (Machine) this.registry.lookup(mach);
-        byte[] s = rem.read(name);
-        return s;
+        rem.read(name,host,port);
     }
 
     @Override
-    public Boolean write(String name, byte[] data) throws IOException {
-        return null;
+    public void write(String name, byte[] data) throws IOException {
+        ;
     }
 
     @Override

@@ -1,14 +1,23 @@
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
 
 public class MachineC extends UnicastRemoteObject implements Machine, Notification {
-
+    private Socket clientSocket;
+    private PrintWriter out;
     String name = null;
 
+    public void startConnection(String ip, int port) throws IOException {
+        clientSocket = new Socket(ip, port);
+        out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+
+    }
     public MachineC(String name) throws RemoteException {
         super();
         this.name = name;
@@ -16,19 +25,20 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
 
     @Override
-    public byte[] read(String name) throws IOException {
-        InputStream read = new BufferedInputStream(new FileInputStream("data//" + name));
-        return read.readAllBytes();
+    public void read(String name, String host, int port) throws IOException {
+        InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
+        this.startConnection(host, port);
+        this.out.println(new String(read.readAllBytes()));
+
     }
 
     @Override
-    public Boolean write(String name, byte[] data) throws IOException {
+    public void write(String name, byte[] data) throws IOException {
         try {
             FileOutputStream sortie = new FileOutputStream(name);
             sortie.write(data);
-            return true;
         } catch (Exception ae){
-            return false;
+            ae.printStackTrace();
         }
     }
 

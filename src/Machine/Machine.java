@@ -11,6 +11,6 @@ public interface Machine extends Remote{
      * @param name : name of the file
      */
 
-    public byte[] read(String name) throws RemoteException, IOException, NotBoundException, InterruptedException;
-    public Boolean write(String name, byte[] data) throws RemoteException, IOException;
+    public void read(String name, String host, int port) throws RemoteException, IOException, NotBoundException, InterruptedException;
+    public void write(String name, byte[] data) throws RemoteException, IOException;
 }
