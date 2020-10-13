@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private Registry registry = null;
-    private int turn = 0;
+    private int turn = 1;
 
     protected Switcher(Registry registry) throws RemoteException {
         super();
@@ -63,7 +63,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         String[] value = this.registry.list();
         int length = value.length;
         value = Arrays.copyOfRange(value, 0, length-1);
-        int a = this.turn%length;
+        int a = this.turn%(length-1);
         this.turn++;
         return value[a];
     }
