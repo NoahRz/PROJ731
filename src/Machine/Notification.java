@@ -3,4 +3,5 @@ import java.rmi.Remote;
 
 public interface Notification extends Remote {
         Boolean alive() throws IOException;
+        int Charge() throws  IOException;
 }
