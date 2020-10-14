@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -25,6 +28,24 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
 
     @Override
+    public boolean createFile(String filename) throws RemoteException { // RemoteException useless ?
+        try {
+            File file = new File(name + "/" + filename);
+            if (file.createNewFile()) {
+                System.out.println("File created: " + file.getName());
+                return true;
+            } else {
+                System.out.println("File already exists.");
+                return false;
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public void read(String name, String host, int port) throws IOException {
         InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
         this.startConnection(host, port);
@@ -35,8 +56,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     @Override
     public void write(String name, byte[] data) throws IOException {
         try {
-            FileOutputStream sortie = new FileOutputStream(name);
-            sortie.write(data);
+            FileOutputStream fileOutputStream = new FileOutputStream(name);
+            fileOutputStream.write(data);
         } catch (Exception ae){
             ae.printStackTrace();
         }
@@ -48,18 +69,25 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
 
     public void launch() throws IOException, NotBoundException, AlreadyBoundException {
-        Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
-        //Remote r = Naming.lookup("switcher");
+        Remote switcher = Naming.lookup("rmi://localhost:1099/Switcher");
+        //Remote switcher = Naming.lookup("switcher");
 
-        if (r instanceof Controle) {
-            boolean s = ((Controle) r).add(name, this);
+        if (switcher instanceof Controle) {
+            boolean s = ((Controle) switcher).add(name, this);
+            this.createDirectory();
             System.out.println(s);
         }
     }
 
+    public void createDirectory() throws IOException {
+        Path path = Paths.get("./" + name);
+        Files.createDirectory(path);
+    }
+
+
     public void checkOut() throws RemoteException, NotBoundException, MalformedURLException {
-        Controle r = (Controle) Naming.lookup("rmi://localhost:1099/Switcher");
-        r.remove(this.getName());
+        Controle switcher = (Controle) Naming.lookup("rmi://localhost:1099/Switcher");
+        switcher.remove(this.getName());
     }
 
     @Override
@@ -67,17 +95,39 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         return true;
     }
 
+    public static void copy(File pathOfFileToCopy, File pathOfFileWhereToPaste) throws IOException { // amybe should use the Apache IO method
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            inputStream = new FileInputStream(pathOfFileToCopy);
+            outputStream = new FileOutputStream(pathOfFileWhereToPaste); // buffer size 1K
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        } finally {
+            inputStream.close();
+            outputStream.close(); }
+    }
+
     public static void main(String[] args) {
         try {
+            String machineName = args[0];
             Registry registry = LocateRegistry.getRegistry(); // default port is 1099
 
-            MachineC machineC = new MachineC(args[0]);
+            MachineC machineC = new MachineC(machineName);
 
             machineC.launch();
 
-            System.out.println("Starting " + args[0] + " : ...");
+            System.out.println(machineName + " is running ...");
         } catch (IOException | NotBoundException | AlreadyBoundException e) {
             e.printStackTrace();
         }
     }
 }
+
+// method to synchro each file of each server :
+// switcher has a list of file name that a server (already in the system) has.
+// when we add a new server, we copy past each file of the first server find by the switcher into the new server
+// (we do this with the first server find because all the files are supposed to be the same for all servers)

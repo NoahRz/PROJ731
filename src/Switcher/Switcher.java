@@ -4,6 +4,7 @@ import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -13,6 +14,7 @@ import java.util.Arrays;
 public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private Registry registry = null;
     private int turn = 1;
+    private ArrayList<String> filenames = new ArrayList<String>();
 
     protected Switcher(Registry registry) throws RemoteException {
         super();
@@ -25,6 +27,19 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
             System.out.println(i);
         }
     }
+
+    @Override
+    public boolean createFile(String filename) throws RemoteException, NotBoundException {
+        if (filenames.contains(filename)){
+            return false;
+        }else {
+            filenames.add(filename);
+            this.createFileInEachMachine(filename);
+            return true;
+        }
+
+    }
+
     @Override
     public void read(String name,String host, int port) throws IOException, NotBoundException, InterruptedException {
         String mach = this.machineAlive();
@@ -59,8 +74,20 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
+    @Override
+    public void createFileInEachMachine(String filename) throws RemoteException, NotBoundException {
+        String[] remoteObjectNames = registry.list();
+        for (String remoteObjectName : remoteObjectNames) {
+            Remote remoteObject = this.registry.lookup(remoteObjectName);
+            if (remoteObject instanceof Notification) { // it it is a machine
+                MachineC machineC = (MachineC) remoteObject;
+                machineC.createFile(filename);
+            }
+        }
+    }
+
     public String roundRobin() throws RemoteException {
-        String[] value = this.registry.list();
+        String[] value = this.registry.list(); // WARNING : there is the switcher in the list
         int length = value.length;
         value = Arrays.copyOfRange(value, 0, length-1);
         int a = this.turn%(length-1);
@@ -95,7 +122,8 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
             String url = "rmi://localhost:1099/Switcher";
             Naming.rebind(url, switcher);
 
-            System.out.println("Starting switcher ...");
+            System.out.println("Switcher is running ...");
+
         } catch (RemoteException | MalformedURLException e) {
             e.printStackTrace();
         }
