@@ -27,7 +27,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     }
     @Override
     public void read(String name,String host, int port) throws IOException, NotBoundException, InterruptedException {
-        String mach = this.machineAlive();
+        String mach = this.machineAlive(1);
         Machine rem = (Machine) this.registry.lookup(mach);
         rem.read(name,host,port);
     }
@@ -68,19 +68,52 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         return value[a];
     }
 
-    public String machineAlive() throws IOException, NotBoundException {
-        String url = this.roundRobin();
-        try {
-            Notification rem = (Notification) this.registry.lookup(url);
-            rem.alive();
-            return url;
-        } catch (NotBoundException | IOException e) {
-            this.registry.unbind(url);
-            url = this.roundRobin();
-            this.machineAlive();
-            return url;
-        }
 
+    public String machineAlive(int methode) throws IOException, NotBoundException {
+        if (methode == 1) {
+            String url = this.roundRobin();
+            try {
+                Notification rem = (Notification) this.registry.lookup(url);
+                rem.alive();
+                return url;
+            } catch (NotBoundException | IOException e) {
+                this.registry.unbind(url);
+                url = this.roundRobin();
+                this.machineAlive(methode);
+                return url;
+            }
+        } else if ( methode == 2) {
+            String url = this.lessCharges();
+            try {
+                Notification rem = (Notification) this.registry.lookup(url);
+                rem.alive();
+                return url;
+            } catch (NotBoundException | IOException e) {
+                this.registry.unbind(url);
+                url = this.lessCharges();
+                this.machineAlive(methode);
+                return url;
+            }
+        }
+        return "Error";
+    }
+
+    public String lessCharges() throws IOException, NotBoundException {
+        String machineMin = "";
+        int chargeMin = 0;
+        for(int i = 0; i < this.registry.list().length-1; i++){
+            String name = this.registry.list()[i];
+            Notification rem = (Notification) this.registry.lookup(name);
+            int val = rem.Charge();
+            if(val >= chargeMin){
+                if (val == 0){
+                    return name;
+                }
+                chargeMin = val;
+                machineMin = name;
+            }
+        }
+        return machineMin;
     }
 
     // ---------------------------------------------------------------------------------------------
