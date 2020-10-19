@@ -1,7 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.lang.management.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -24,14 +24,13 @@ public class Client {
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
     public String read(String name){
-
+        System.out.println();
         try {
                 Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
                 this.startListen(this.port);
                 if (r instanceof Machine) {
                     ((Machine) r).read(name, InetAddress.getLocalHost().getHostAddress(), this.port);
                 }
-                //On att le résultat
                 this.waitMessage();
                 return this.in.readLine();
             } catch (NotBoundException | IOException | InterruptedException e) {
@@ -39,9 +38,24 @@ public class Client {
                 return "";
             }
         }
+    public String write(String name, String data){
+        System.out.println();
+        try {
+            Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
+            this.startListen(this.port);
+            if (r instanceof Machine) {
+                ((Machine) r).write(name, data.getBytes(), InetAddress.getLocalHost().getHostAddress(), this.port);
+            }
+            this.waitMessage();
+            return this.in.readLine();
+        } catch (NotBoundException | IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
 
-    public static <Information> void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         int port;
         try{
              port = Integer.parseInt(args[0]);
@@ -50,7 +64,8 @@ public class Client {
         }
         Client client1 = new Client(port);
 
-        String result = client1.read("ressource_1.txt");
+//        String result = client1.read("ressource_1.txt");
+        String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
         System.out.println(result);
     }
 }

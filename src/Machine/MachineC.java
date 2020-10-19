@@ -57,12 +57,13 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     }
 
     @Override
-    public void write(String name, byte[] data) throws IOException {
+    public void write(String name, byte[] data, String host, int port) throws IOException {
         this.charge++;
         try {
-            System.out.println(InetAddress.getLocalHost().getHostAddress());
-            FileOutputStream fileOutputStream = new FileOutputStream(name);
+            FileOutputStream fileOutputStream = new FileOutputStream(".//src//data//" +name);
             fileOutputStream.write(data);
+            this.startConnection(host, port);
+            this.out.println("Modification faite");
         } catch (Exception ae){
             ae.printStackTrace();
         }
@@ -86,8 +87,13 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     }
 
     public void createDirectory() throws IOException {
-        Path path = Paths.get("./" + name);
-        Files.createDirectory(path);
+        try {
+            Path path = Paths.get("./" + name);
+            Files.createDirectory(path);
+        } catch (Exception e){
+            ;
+        }
+
     }
 
 

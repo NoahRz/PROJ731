@@ -6,6 +6,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * The Switcher class receives requests from clients and distributes them among machines.
@@ -15,6 +16,8 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private Registry registry = null;
     private int turn = 1;
     private ArrayList<String> filenames = new ArrayList<String>();
+    private HashMap<String,Boolean> writeFile = new HashMap<String,Boolean>();
+
 
     protected Switcher(Registry registry) throws RemoteException {
         super();
@@ -48,7 +51,10 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     }
 
     @Override
-    public void write(String name, byte[] data) throws IOException {
+    public void write(String name, byte[] data, String host, int port) throws IOException, NotBoundException {
+        String mach = this.machineAlive(1);
+        Machine rem = (Machine) this.registry.lookup(mach);
+        rem.write(name,data, host, port);
         ;
     }
 
