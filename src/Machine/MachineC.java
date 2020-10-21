@@ -16,13 +16,14 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     private PrintWriter out;
     String name = null;
     private int charge = 0;
-
+    private Remote switcher = null;
     public String getName() {
         return name;
     }
 
     public MachineC(String name) throws IOException, NotBoundException, AlreadyBoundException {
         super();
+        this.switcher = GlobalConfiguration.switcher;
         this.name = name;
         this.launch();
     }
@@ -109,7 +110,6 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         /**
          * Add the machine to Switcher registry
          */
-        Remote switcher = Naming.lookup("rmi://localhost:1099/Switcher");
 
         if (switcher instanceof Controle) {
             boolean s = ((Controle) switcher).add(name, this);
@@ -130,8 +130,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
 
     public void checkOut() throws RemoteException, NotBoundException, MalformedURLException {
-        Controle switcher = (Controle) Naming.lookup("rmi://localhost:1099/Switcher");
-        switcher.remove(this.getName());
+            ((Controle) switcher).remove(this.getName());
+
     }
 
 
@@ -163,12 +163,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         /**
          * Creat a run methode for give machine charge to switcher
          */
-        Controle switche = null;
-        try {
-            switche = (Controle) Naming.lookup("rmi://localhost:1099/Switcher");
-        } catch (NotBoundException | MalformedURLException | RemoteException e) {
-            e.printStackTrace();
-        }
+
 
         while (true) {
             try {
@@ -176,13 +171,12 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
             try {
-                switche.writeCharge(this.name, this.charge);
+                ((Controle)switcher).writeCharge(this.name, this.charge);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-
-            //Remote switcher = Naming.lookup("switcher");
         }
     }
 

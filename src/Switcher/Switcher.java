@@ -134,7 +134,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         /**
          * This method is used for distribute the charge between the machines
          */
-        System.out.println(this.fileCharge);
         String[] value = this.registry.list(); // WARNING : there is the switcher in the list
         int length = value.length;
         value = Arrays.copyOfRange(value, 0, length-1);
