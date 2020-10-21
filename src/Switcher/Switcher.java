@@ -152,12 +152,14 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     public static void main(String[] args) {
         try {
 
-            Registry registry = LocateRegistry.createRegistry(1099);
+            //Registry registry = LocateRegistry.createRegistry(1099);
             // did this because still got the error : java.rmi.UnmarshalException: error unmarshalling arguments
+
+            Registry registry = LocateRegistry.getRegistry();
 
             Switcher switcher = new Switcher(registry);
 
-            String url = "rmi://localhost:1099/Switcher";
+            String url = "rmi://localhost/Switcher";
             Naming.rebind(url, switcher);
 
             System.out.println("Switcher is running ...");

@@ -48,7 +48,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     @Override
     public void read(String name, String host, int port) throws IOException {
         this.charge++;
-        InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
+        //InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
+        InputStream read = new BufferedInputStream(new FileInputStream("/root/switcher_rmi_docker/data"));
         this.startConnection(host, port);
         this.out.println(new String(read.readAllBytes()));
         this.charge--;
@@ -73,7 +74,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     }
 
     public void launch() throws IOException, NotBoundException, AlreadyBoundException {
-        Remote switcher = Naming.lookup("rmi://localhost:1099/Switcher");
+        Remote switcher = Naming.lookup("rmi://localhost/Switcher");
         //Remote switcher = Naming.lookup("switcher");
 
         if (switcher instanceof Controle) {
@@ -85,7 +86,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
     public void createDirectory() throws IOException {
         try {
-            Path path = Paths.get("./" + name);
+            Path path = Paths.get("/root/switcher_rmi_docker/data");
             Files.createDirectory(path);
         } catch (Exception e){
             ;
@@ -95,7 +96,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
 
     public void checkOut() throws RemoteException, NotBoundException, MalformedURLException {
-        Controle switcher = (Controle) Naming.lookup("rmi://localhost:1099/Switcher");
+        Controle switcher = (Controle) Naming.lookup("rmi://localhost/Switcher");
         switcher.remove(this.getName());
     }
 

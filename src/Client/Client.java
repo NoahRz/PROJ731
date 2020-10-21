@@ -30,7 +30,7 @@ public class Client {
     public String read(String name){
         System.out.println();
         try {
-                Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
+                Remote r = Naming.lookup("rmi://localhost/Switcher");
                 this.startListen(this.port);
                 if (r instanceof Machine) {
                     ((Machine) r).read(name, InetAddress.getLocalHost().getHostAddress(), this.port);
@@ -46,7 +46,7 @@ public class Client {
     public String write(String name, String data){
         System.out.println();
         try {
-            Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
+            Remote r = Naming.lookup("rmi://localhost/Switcher");
             this.startListen(this.port);
             if (r instanceof Machine) {
                 ((Machine) r).write(name, data.getBytes(), InetAddress.getLocalHost().getHostAddress(), this.port);
