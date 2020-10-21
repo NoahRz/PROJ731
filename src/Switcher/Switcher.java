@@ -16,7 +16,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private Registry registry = null;
     private int turn = 1;
     private ArrayList<String> filenames = new ArrayList<String>();
-    private HashMap<String,Boolean> writeFile = new HashMap<String,Boolean>();
+    private HashMap<String, Integer> fileCharge = new HashMap<String, Integer>();
 
 
     protected Switcher(Registry registry) throws RemoteException {
@@ -61,6 +61,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     public boolean add(String url, Machine machine) throws RemoteException, AlreadyBoundException {
         try{
             this.registry.rebind("rmi://localhost:1099//"  + url, machine);
+            this.fileCharge.put(url,0);
             return true;
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -80,6 +81,12 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     }
 
     @Override
+    public void writeCharge(String name, int charge) throws RemoteException {
+        System.out.println("Bonjour");
+        this.fileCharge.replace(name,charge);
+    }
+
+    @Override
     public void createFileInEachMachine(String filename) throws RemoteException, NotBoundException {
         String[] remoteObjectNames = registry.list();
         for (String remoteObjectName : remoteObjectNames) {
@@ -92,6 +99,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     }
 
     public String roundRobin() throws RemoteException {
+        System.out.println(this.fileCharge);
         String[] value = this.registry.list(); // WARNING : there is the switcher in the list
         int length = value.length;
         value = Arrays.copyOfRange(value, 0, length-1);

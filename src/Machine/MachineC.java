@@ -11,7 +11,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 
-public class MachineC extends UnicastRemoteObject implements Machine, Notification {
+public class MachineC extends UnicastRemoteObject implements Machine, Notification, Runnable {
     private Socket clientSocket;
     private PrintWriter out;
     String name = null;
@@ -74,7 +74,6 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
     public void launch() throws IOException, NotBoundException, AlreadyBoundException {
         Remote switcher = Naming.lookup("rmi://localhost:1099/Switcher");
-        //Remote switcher = Naming.lookup("switcher");
 
         if (switcher instanceof Controle) {
             boolean s = ((Controle) switcher).add(name, this);
@@ -125,13 +124,45 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         return this.charge;
     }
 
+    @Override
+    public void run() {
+        /**
+         * Creat a run methode for give machine charge to switcher
+         */
+        Controle switche = null;
+        try {
+            switche = (Controle) Naming.lookup("rmi://localhost:1099/Switcher");
+        } catch (NotBoundException | MalformedURLException | RemoteException e) {
+            e.printStackTrace();
+        }
+
+        while (true){
+            try {
+                Thread.sleep(20000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            try {
+                switche.writeCharge(this.name, this.charge);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+            //Remote switcher = Naming.lookup("switcher");
+        }
+    }
+
+
+
+
+
     public static void main(String[] args) {
         try {
             String machineName = args[0];
             Registry registry = LocateRegistry.getRegistry(); // default port is 1099
 
             MachineC machineC = new MachineC(machineName);
-
+            new Thread(machineC).start();
             machineC.launch();
 
             System.out.println(machineName + " is running ...");
@@ -139,7 +170,10 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             e.printStackTrace();
         }
     }
-}
+
+
+    }
+
 
 // method to synchro each file of each server :
 // switcher has a list of file name that a server (already in the system) has.
