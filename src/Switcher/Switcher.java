@@ -24,12 +24,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         this.registry = registry;
     }
 
-    private void voirRegistre() throws RemoteException {
-        System.out.println("====================================");
-        for(String i : this.registry.list()){
-            System.out.println(i);
-        }
-    }
 
     @Override
     public boolean createFile(String filename) throws RemoteException, NotBoundException {
@@ -42,23 +36,47 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
+
+
+    // =============================================================================================================
     @Override
     public void read(String name,String host, int port) throws IOException, NotBoundException, InterruptedException {
+        /**
+         * Read 'name' document document.
+         * This method is distributed with RMI, 'Machine' is a remote object
+         * Method of Machine interface
+         */
+
         String mach = this.machineAlive(1);
         Machine rem = (Machine) this.registry.lookup(mach);
         rem.read(name,host,port);
     }
 
+
     @Override
     public void write(String name, byte[] data, String host, int port) throws IOException, NotBoundException {
+        /**
+         * Write in the document 'name'
+         * This method is distributed with RMI, 'Machine' is a remote object
+         * Method of Machine interface
+         */
         String mach = this.machineAlive(1);
         Machine rem = (Machine) this.registry.lookup(mach);
         rem.write(name,data, host, port);
         ;
     }
 
+    // =============================================================================================================
+
+
+
+    // =============================================================================================================
     @Override
     public boolean add(String url, Machine machine) throws RemoteException, AlreadyBoundException {
+        /**
+         * This method add a remote object (Machine) in this.registre
+         * Methode of control
+         */
         try{
             this.registry.rebind("rmi://localhost:1099//"  + url, machine);
             this.fileCharge.put(url,0);
@@ -69,8 +87,13 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
+
     @Override
     public boolean remove(String url) throws RemoteException {
+        /**
+         * This method remove a remote object (Machine) of this.registre
+         * Methode of control
+         */
         try{
             this.registry.unbind(url);
             return true;
@@ -80,11 +103,18 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
+
     @Override
     public void writeCharge(String name, int charge) throws RemoteException {
-        System.out.println("Bonjour");
+        /**
+         * Change a charge of Machine
+         */
         this.fileCharge.replace(name,charge);
     }
+    // =============================================================================================================
+
+
+
 
     @Override
     public void createFileInEachMachine(String filename) throws RemoteException, NotBoundException {
@@ -98,7 +128,12 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
+
+    // =============================================================================================================
     public String roundRobin() throws RemoteException {
+        /**
+         * This method is used for distribute the charge between the machines
+         */
         System.out.println(this.fileCharge);
         String[] value = this.registry.list(); // WARNING : there is the switcher in the list
         int length = value.length;
@@ -109,7 +144,35 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     }
 
 
+    public String lessCharges() throws IOException, NotBoundException {
+        /**
+         * This methode is used for distribute the charge between the machine, the method choose the machine with the less charge
+         */
+        String machineMin = "";
+        int chargeMin = 0;
+        for(int i = 0; i < this.registry.list().length-1; i++){
+            String name = this.registry.list()[i];
+            Notification rem = (Notification) this.registry.lookup(name);
+            int val = rem.Charge();
+            if(val >= chargeMin){
+                if (val == 0){
+                    return name;
+                }
+                chargeMin = val;
+                machineMin = name;
+            }
+        }
+        return machineMin;
+    }
+
+
     public String machineAlive(int methode) throws IOException, NotBoundException {
+        /**
+         *  At first they execute a distribute algorithme
+         *  If methode = 1 ==> roundRobin
+         *  If methode = 2 ==> lessCharges
+         *  For the machine used this method checks whether it is alive, otherwise the machine is remove and the method is rerun.
+        */
         if (methode == 1) { // Round robbin
             String url = this.roundRobin();
             try {
@@ -138,23 +201,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         return "Error";
     }
 
-    public String lessCharges() throws IOException, NotBoundException {
-        String machineMin = "";
-        int chargeMin = 0;
-        for(int i = 0; i < this.registry.list().length-1; i++){
-            String name = this.registry.list()[i];
-            Notification rem = (Notification) this.registry.lookup(name);
-            int val = rem.Charge();
-            if(val >= chargeMin){
-                if (val == 0){
-                    return name;
-                }
-                chargeMin = val;
-                machineMin = name;
-            }
-        }
-        return machineMin;
-    }
+
 
     // ---------------------------------------------------------------------------------------------
     public static void main(String[] args) {

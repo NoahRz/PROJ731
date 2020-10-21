@@ -19,16 +19,26 @@ public class Client {
     }
 
     public void startListen(int port) throws IOException {
+        /**
+         * Open port
+         */
         serverSocket = new ServerSocket(port);
     }
 
     public void waitMessage() throws IOException {
+        /**
+         * Client wait MachineC responce
+         */
         clientSocket = this.serverSocket.accept();
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
     public String read(String name){
-        System.out.println();
+        /**
+         * Methode for read a document
+         */
+
+
         try {
                 Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
                 this.startListen(this.port);
@@ -44,6 +54,9 @@ public class Client {
         }
 
     public String write(String name, String data){
+        /**
+         * Method for write
+         */
         System.out.println();
         try {
             Remote r = Naming.lookup("rmi://localhost:1099/Switcher");
@@ -60,6 +73,9 @@ public class Client {
     }
 
     public static void main(String[] args) {
+        /**
+         * Main method
+         */
         int port;
         try{
              port = Integer.parseInt(args[0]);

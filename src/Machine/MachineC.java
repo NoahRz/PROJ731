@@ -17,14 +17,38 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     String name = null;
     private int charge = 0;
 
+    public String getName() {
+        return name;
+    }
+
+    public MachineC(String name) throws IOException, NotBoundException, AlreadyBoundException {
+        super();
+        this.name = name;
+        this.launch();
+    }
+    // =============================================================================================================
+
+
+    // =============================================================================================================
     public void startConnection(String ip, int port) throws IOException {
+        /**
+         * Connect the to Client socket
+         */
         clientSocket = new Socket(ip, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
     }
+    // =============================================================================================================
 
-    public MachineC(String name) throws RemoteException {
-        super();
-        this.name = name;
+
+    // =============================================================================================================
+    public void createDirectory() throws IOException {
+        try {
+            Path path = Paths.get("./" + name);
+            Files.createDirectory(path);
+        } catch (Exception e) {
+            ;
+        }
+
     }
 
     @Override
@@ -44,9 +68,16 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         }
         return false;
     }
+    // =============================================================================================================
 
+
+    // =============================================================================================================
     @Override
     public void read(String name, String host, int port) throws IOException {
+        /**
+         * This method read the file 'name' and return the result to client with socket
+         * method of Machine interface
+         */
         this.charge++;
         InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
         this.startConnection(host, port);
@@ -56,23 +87,28 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
     @Override
     public void write(String name, byte[] data, String host, int port) throws IOException {
+        /**
+         * This method write the file 'name' and return the result to client with socket
+         * method of machine interface
+         */
         this.charge++;
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(".//src//data//" +name);
+            FileOutputStream fileOutputStream = new FileOutputStream(".//src//data//" + name);
             fileOutputStream.write(data);
             this.startConnection(host, port);
             this.out.println("Modification faite");
-        } catch (Exception ae){
+        } catch (Exception ae) {
             ae.printStackTrace();
         }
         this.charge--;
     }
 
-    public String getName() {
-        return name;
-    }
+    // =============================================================================================================
 
     public void launch() throws IOException, NotBoundException, AlreadyBoundException {
+        /**
+         * Add the machine to Switcher registry
+         */
         Remote switcher = Naming.lookup("rmi://localhost:1099/Switcher");
 
         if (switcher instanceof Controle) {
@@ -82,15 +118,15 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         }
     }
 
-    public void createDirectory() throws IOException {
-        try {
-            Path path = Paths.get("./" + name);
-            Files.createDirectory(path);
-        } catch (Exception e){
-            ;
-        }
-
+    // =============================================================================================================
+    @Override
+    public Boolean alive() throws IOException {
+        /**
+         * This method notify if they are a life
+         */
+        return true;
     }
+    // =============================================================================================================
 
 
     public void checkOut() throws RemoteException, NotBoundException, MalformedURLException {
@@ -98,10 +134,6 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         switcher.remove(this.getName());
     }
 
-    @Override
-    public Boolean alive() throws IOException {
-        return true;
-    }
 
     public static void copy(File pathOfFileToCopy, File pathOfFileWhereToPaste) throws IOException { // amybe should use the Apache IO method
         InputStream inputStream = null;
@@ -119,6 +151,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             outputStream.close();
         }
     }
+
+
     @Override
     public int Charge() throws IOException {
         return this.charge;
@@ -136,7 +170,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             e.printStackTrace();
         }
 
-        while (true){
+        while (true) {
             try {
                 Thread.sleep(20000);
             } catch (InterruptedException e) {
@@ -153,9 +187,6 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     }
 
 
-
-
-
     public static void main(String[] args) {
         try {
             String machineName = args[0];
@@ -163,16 +194,16 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
             MachineC machineC = new MachineC(machineName);
             new Thread(machineC).start();
-            machineC.launch();
 
             System.out.println(machineName + " is running ...");
-        } catch (IOException | NotBoundException | AlreadyBoundException e) {
+
+        } catch (AlreadyBoundException | IOException | NotBoundException e) {
             e.printStackTrace();
         }
-    }
 
 
     }
+}
 
 
 // method to synchro each file of each server :
