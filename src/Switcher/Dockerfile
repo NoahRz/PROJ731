@@ -10,8 +10,9 @@ COPY Switcher/Switcher.java /root/switcher_rmi_docker
 COPY Machine/Machine.java /root/switcher_rmi_docker
 COPY Switcher/Controle.java /root/switcher_rmi_docker
 COPY Machine/Notification.java /root/switcher_rmi_docker
+COPY Switcher/entrypoint.sh /root/switcher_rmi_docker
 
 
 RUN javac *.java
 
-ENTRYPOINT java Switcher
+ENTRYPOINT ["sh", "entrypoint.sh"]

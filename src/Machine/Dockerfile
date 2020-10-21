@@ -14,4 +14,4 @@ COPY Switcher/Controle.java /root/switcher_rmi_docker
 
 RUN javac *.java
 
-ENTRYPOINT java Machine
+ENTRYPOINT java MachineC

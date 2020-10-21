@@ -60,7 +60,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     @Override
     public boolean add(String url, Machine machine) throws RemoteException, AlreadyBoundException {
         try{
-            this.registry.rebind("rmi://localhost:1099//"  + url, machine);
+            this.registry.rebind("rmi:/localhost/"  + url, machine);
             return true;
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -85,7 +85,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         for (String remoteObjectName : remoteObjectNames) {
             Remote remoteObject = this.registry.lookup(remoteObjectName);
             if (remoteObject instanceof Notification) { // it it is a machine
-                MachineC machineC = (MachineC) remoteObject;
+                Machine machineC = (Machine) remoteObject;
                 machineC.createFile(filename);
             }
         }
@@ -159,7 +159,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
             Switcher switcher = new Switcher(registry);
 
-            String url = "rmi://localhost/Switcher";
+            String url = "rmi:/localhost/Switcher";
             Naming.rebind(url, switcher);
 
             System.out.println("Switcher is running ...");
