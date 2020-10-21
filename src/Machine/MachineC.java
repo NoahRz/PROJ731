@@ -20,14 +20,12 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     public void startConnection(String ip, int port) throws IOException {
         clientSocket = new Socket(ip, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-
     }
+
     public MachineC(String name) throws RemoteException {
         super();
         this.name = name;
     }
-
 
     @Override
     public boolean createFile(String filename) throws RemoteException { // RemoteException useless ?
@@ -73,7 +71,6 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     public String getName() {
         return name;
     }
-
 
     public void launch() throws IOException, NotBoundException, AlreadyBoundException {
         Remote switcher = Naming.lookup("rmi://localhost:1099/Switcher");

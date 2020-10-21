@@ -40,7 +40,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
             this.createFileInEachMachine(filename);
             return true;
         }
-
     }
 
     @Override
@@ -103,7 +102,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
 
     public String machineAlive(int methode) throws IOException, NotBoundException {
-        if (methode == 1) {
+        if (methode == 1) { // Round robbin
             String url = this.roundRobin();
             try {
                 Notification rem = (Notification) this.registry.lookup(url);
@@ -115,7 +114,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
                 this.machineAlive(methode);
                 return url;
             }
-        } else if ( methode == 2) {
+        } else if ( methode == 2) { // according to machine charges
             String url = this.lessCharges();
             try {
                 Notification rem = (Notification) this.registry.lookup(url);

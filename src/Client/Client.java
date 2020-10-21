@@ -8,13 +8,16 @@ import java.net.Socket;
 import java.rmi.*;
 
 public class Client {
+
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private BufferedReader in;
     int port;
+
     public Client(int port){
         this.port = port;
     }
+
     public void startListen(int port) throws IOException {
         serverSocket = new ServerSocket(port);
     }
@@ -23,6 +26,7 @@ public class Client {
         clientSocket = this.serverSocket.accept();
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
+
     public String read(String name){
         System.out.println();
         try {
@@ -38,6 +42,7 @@ public class Client {
                 return "";
             }
         }
+
     public String write(String name, String data){
         System.out.println();
         try {
@@ -53,7 +58,6 @@ public class Client {
             return "";
         }
     }
-
 
     public static void main(String[] args) {
         int port;
