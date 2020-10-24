@@ -6,9 +6,5 @@ public class LancementMachines {
     public static void main(String[] args) throws IOException, NotBoundException, AlreadyBoundException {
         MachineC machine1 = new MachineC("machine1");
         MachineC machine2 = new MachineC("machine2");
-
-        machine1.launch();
-        machine2.launch();
-
     }
 }

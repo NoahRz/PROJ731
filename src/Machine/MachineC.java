@@ -1,5 +1,4 @@
 import java.io.*;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -9,7 +8,6 @@ import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Arrays;
 
 public class MachineC extends UnicastRemoteObject implements Machine, Notification, Runnable {
     private Socket clientSocket;
@@ -112,7 +110,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          */
 
         if (switcher instanceof Controle) {
-            boolean s = ((Controle) switcher).add(name, this);
+            boolean s = ((Controle) switcher).add(name , this);
             this.createDirectory();
             System.out.println(s);
         }

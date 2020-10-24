@@ -84,8 +84,8 @@ public class Client {
         }
         Client client1 = new Client(port);
 
-//        String result = client1.read("ressource_1.txt");
-        String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
+        String result = client1.read("ressource_1.txt");
+//        String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
         System.out.println(result);
     }
 }

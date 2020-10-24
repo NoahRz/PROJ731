@@ -7,13 +7,17 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * The Switcher class receives requests from clients and distributes them among machines.
  * Thus it is server for client and client for machine.
  */
 public class Switcher extends UnicastRemoteObject implements Machine, Controle {
-    private Registry registry = null;
+    // Variable
+    private HashMap<String, Remote> privateRegistry = new HashMap<>();
+//    private Registry registry = null;
     private int turn = 1;
     private ArrayList<String> filenames = new ArrayList<String>();
     private HashMap<String, Integer> fileCharge = new HashMap<String, Integer>();
@@ -21,7 +25,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
     protected Switcher(Registry registry) throws RemoteException {
         super();
-        this.registry = registry;
     }
 
 
@@ -48,7 +51,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          */
 
         String mach = this.machineAlive(1);
-        Machine rem = (Machine) this.registry.lookup(mach);
+        Machine rem = (Machine) this.privateRegistry.get(mach);
         rem.read(name,host,port);
     }
 
@@ -61,7 +64,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * Method of Machine interface
          */
         String mach = this.machineAlive(1);
-        Machine rem = (Machine) this.registry.lookup(mach);
+        Machine rem = (Machine) this.privateRegistry.get(mach);
         rem.write(name,data, host, port);
         ;
     }
@@ -77,14 +80,10 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * This method add a remote object (Machine) in this.registre
          * Methode of control
          */
-        try{
-            this.registry.rebind("rmi://localhost:1099//"  + url, machine);
-            this.fileCharge.put(url,0);
-            return true;
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return false;
-        }
+        this.privateRegistry.put(url, machine);
+//            this.registry.rebind("rmi://localhost:1099//"  + url, machine);
+        this.fileCharge.put(url,0);
+        return true;
     }
 
 
@@ -95,9 +94,9 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * Methode of control
          */
         try{
-            this.registry.unbind(url);
+            this.privateRegistry.remove(url);
             return true;
-        } catch (NotBoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -118,9 +117,10 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
     @Override
     public void createFileInEachMachine(String filename) throws RemoteException, NotBoundException {
-        String[] remoteObjectNames = registry.list();
+        ArrayList<String> remoteObjectNames = new ArrayList<>(this.privateRegistry.keySet());
+
         for (String remoteObjectName : remoteObjectNames) {
-            Remote remoteObject = this.registry.lookup(remoteObjectName);
+            Remote remoteObject = this.privateRegistry.get(remoteObjectName);
             if (remoteObject instanceof Notification) { // it it is a machine
                 MachineC machineC = (MachineC) remoteObject;
                 machineC.createFile(filename);
@@ -134,34 +134,35 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         /**
          * This method is used for distribute the charge between the machines
          */
-        String[] value = this.registry.list(); // WARNING : there is the switcher in the list
-        int length = value.length;
-        value = Arrays.copyOfRange(value, 0, length-1);
+        ArrayList<String> nameListe = new ArrayList<>(this.privateRegistry.keySet());
+        int length = nameListe.size();
         int a = this.turn%(length-1);
         this.turn++;
-        return value[a];
+        return nameListe.get(a);
+
+
     }
 
 
     public String lessCharges() throws IOException, NotBoundException {
         /**
-         * This methode is used for distribute the charge between the machine, the method choose the machine with the less charge
+         * This method find the machine with the less charged.
          */
-        String machineMin = "";
-        int chargeMin = 0;
-        for(int i = 0; i < this.registry.list().length-1; i++){
-            String name = this.registry.list()[i];
-            Notification rem = (Notification) this.registry.lookup(name);
-            int val = rem.Charge();
-            if(val >= chargeMin){
-                if (val == 0){
-                    return name;
+        String name = "";
+        int min = -1;
+        for(String i : this.privateRegistry.keySet()){
+            Notification charged = (Notification) this.privateRegistry.get(i);
+            int valMachine = charged.Charge();
+            if (valMachine > min){
+                min = valMachine;
+                if(min == 0){
+                    return i;
                 }
-                chargeMin = val;
-                machineMin = name;
+                name = i;
             }
         }
-        return machineMin;
+
+        return name;
     }
 
 
@@ -175,11 +176,11 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         if (methode == 1) { // Round robbin
             String url = this.roundRobin();
             try {
-                Notification rem = (Notification) this.registry.lookup(url);
+                Notification rem = (Notification) this.privateRegistry.get(url);
                 rem.alive();
                 return url;
-            } catch (NotBoundException | IOException e) {
-                this.registry.unbind(url);
+            } catch (IOException e) {
+                this.privateRegistry.get(url);
                 url = this.roundRobin();
                 this.machineAlive(methode);
                 return url;
@@ -187,11 +188,11 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         } else if ( methode == 2) { // according to machine charges
             String url = this.lessCharges();
             try {
-                Notification rem = (Notification) this.registry.lookup(url);
+                Notification rem = (Notification) this.privateRegistry.get(url);
                 rem.alive();
                 return url;
-            } catch (NotBoundException | IOException e) {
-                this.registry.unbind(url);
+            } catch (IOException e) {
+                this.privateRegistry.get(url);
                 url = this.lessCharges();
                 this.machineAlive(methode);
                 return url;
