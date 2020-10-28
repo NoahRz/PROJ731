@@ -7,15 +7,15 @@ import java.rmi.registry.Registry;
 
 public interface Machine extends Remote{
     /**
-     * this interface reads files and write data in files
-     * @param name : name of the file
+     * this interface reads files and writes data in files
+     * @param filename : name of the file
      */
 
-    public boolean createFile(String filename) throws RemoteException, NotBoundException;
+    boolean createFile(String filename) throws RemoteException, NotBoundException;
 
-    public boolean createFile(String filename, byte[] data, String host, int port) throws RemoteException;
+    boolean createFile(String filename, byte[] data, String host, int port) throws RemoteException;
 
-    public void read(String filename, String host, int port) throws RemoteException, IOException, NotBoundException, InterruptedException;
+    void read(String filename, String host, int port) throws IOException, NotBoundException, InterruptedException;
 
-    public void write(String filename, byte[] data, String host, int port) throws RemoteException, IOException, NotBoundException;
+    void write(String filename, byte[] data, String host, int port) throws IOException, NotBoundException;
 }
