@@ -8,7 +8,7 @@ public class GlobalConfiguration {
     public static Remote switcher;
     static {
         try {
-            switcher = Naming.lookup("rmi://localhost:1099/Switcher");
+            switcher = Naming.lookup("rmi:/localhost/Switcher");
 
         } catch (NotBoundException | MalformedURLException | RemoteException e) {
             e.printStackTrace();
