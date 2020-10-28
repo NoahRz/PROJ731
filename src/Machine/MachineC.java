@@ -40,20 +40,11 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
 
     // =============================================================================================================
-    public void createDirectory() throws IOException {
-        try {
-            Path path = Paths.get("./" + name);
-            Files.createDirectory(path);
-        } catch (Exception e) {
-            ;
-        }
-
-    }
 
     @Override
     public boolean createFile(String filename) throws RemoteException { // RemoteException useless ?
         try {
-            File file = new File(name + "/" + filename);
+            File file = new File("/root/switcher_rmi_docker/data/" + filename);
             if (file.createNewFile()) {
                 System.out.println("File created: " + file.getName());
                 return true;
@@ -77,8 +68,10 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          * This method read the file 'name' and return the result to client with socket
          * method of Machine interface
          */
+
         this.charge++;
-        InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
+        //InputStream read = new BufferedInputStream(new FileInputStream(".//src//data//" + name));
+        InputStream read = new BufferedInputStream(new FileInputStream("/root/switcher_rmi_docker/data"));
         this.startConnection(host, port);
         this.out.println(new String(read.readAllBytes()));
         this.charge--;
@@ -92,7 +85,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          */
         this.charge++;
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(".//src//data//" + name);
+            FileOutputStream fileOutputStream = new FileOutputStream("./src/data/" +name);
             fileOutputStream.write(data);
             this.startConnection(host, port);
             this.out.println("Modification faite");
@@ -114,6 +107,9 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             this.createDirectory();
             System.out.println(s);
         }
+
+        //System.out.println(this.createFile("file1.txt"));
+
     }
 
     // =============================================================================================================
@@ -124,12 +120,20 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          */
         return true;
     }
+
+    public void createDirectory() throws IOException {
+        try {
+            Path path = Paths.get("/root/switcher_rmi_docker/data");
+            Files.createDirectory(path);
+        } catch (Exception e){
+            ;
+        }
+    }
     // =============================================================================================================
 
 
     public void checkOut() throws RemoteException, NotBoundException, MalformedURLException {
             ((Controle) switcher).remove(this.getName());
-
     }
 
 
@@ -181,13 +185,16 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
     public static void main(String[] args) {
         try {
-            String machineName = args[0];
+            //String machineName = args[0];
             Registry registry = LocateRegistry.getRegistry(); // default port is 1099
 
-            MachineC machineC = new MachineC(machineName);
+            MachineC machineC = new MachineC("machine1");
+            //MachineC machineC = new MachineC(machineName);
+            machineC.launch();
+
             new Thread(machineC).start();
 
-            System.out.println(machineName + " is running ...");
+            System.out.println("machine1" + " is running ...");
 
         } catch (AlreadyBoundException | IOException | NotBoundException e) {
             e.printStackTrace();
