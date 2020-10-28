@@ -12,17 +12,19 @@ import java.rmi.server.UnicastRemoteObject;
 public class MachineC extends UnicastRemoteObject implements Machine, Notification, Runnable {
     private Socket clientSocket;
     private PrintWriter out;
-    String name = null;
+    //String name = null; // to remove
     private int charge = 0;
     private Remote switcher = null;
-    public String getName() {
-        return name;
-    }
+    private final String dataPath = "/root/switcher_rmi_docker/data/";
 
-    public MachineC(String name) throws IOException, NotBoundException, AlreadyBoundException {
+    /*public String getName() {
+        return name;
+    }*/
+
+    public MachineC() throws IOException, NotBoundException, AlreadyBoundException {
         super();
         this.switcher = GlobalConfiguration.switcher;
-        this.name = name;
+        //this.name = name;
         this.launch();
     }
     // =============================================================================================================
@@ -41,12 +43,13 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
     // =============================================================================================================
 
-    @Override
-    public boolean createFile(String filename) throws RemoteException { // RemoteException useless ?
+    public boolean createFile(String filename, byte[] data, String host, int port) throws RemoteException { // RemoteException useless ?
         try {
-            File file = new File("/root/switcher_rmi_docker/data/" + filename);
+            File file = new File(dataPath+ filename);
             if (file.createNewFile()) {
                 System.out.println("File created: " + file.getName());
+                this.startConnection(host, port);
+                this.out.println("File "+ file.getName() + " created");
                 return true;
             } else {
                 System.out.println("File already exists.");
@@ -60,6 +63,11 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     }
     // =============================================================================================================
 
+
+    @Override
+    public boolean createFile(String filename) throws RemoteException, NotBoundException {
+        return false;
+    }
 
     // =============================================================================================================
     @Override
@@ -103,7 +111,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          */
 
         if (switcher instanceof Controle) {
-            boolean s = ((Controle) switcher).add(name , this);
+            //boolean s = ((Controle) switcher).add(name , this);
+            boolean s = ((Controle) switcher).add(this);
             this.createDirectory();
             System.out.println(s);
         }
@@ -123,7 +132,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
     public void createDirectory() throws IOException {
         try {
-            Path path = Paths.get("/root/switcher_rmi_docker/data");
+            Path path = Paths.get(dataPath);
             Files.createDirectory(path);
         } catch (Exception e){
             ;
@@ -133,7 +142,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
 
     public void checkOut() throws RemoteException, NotBoundException, MalformedURLException {
-            ((Controle) switcher).remove(this.getName());
+            //((Controle) switcher).remove(this.getName());
+        ((Controle) switcher).remove(this);
     }
 
 
@@ -163,7 +173,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     @Override
     public void run() {
         /**
-         * Creat a run methode for give machine charge to switcher
+         * Create a run methode for give machine charge to switcher
          */
 
 
@@ -175,8 +185,11 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             }
 
             try {
-                ((Controle)switcher).writeCharge(this.name, this.charge);
+                //((Controle)switcher).writeCharge(this.name, this.charge);
+                ((Controle)switcher).writeCharge(this, this.charge);
             } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -188,13 +201,12 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             //String machineName = args[0];
             Registry registry = LocateRegistry.getRegistry(); // default port is 1099
 
-            MachineC machineC = new MachineC("machine1");
+            MachineC machineC = new MachineC();
             //MachineC machineC = new MachineC(machineName);
-            machineC.launch();
 
             new Thread(machineC).start();
 
-            System.out.println("machine1" + " is running ...");
+            System.out.println("Machine" + " is running ...");
 
         } catch (AlreadyBoundException | IOException | NotBoundException e) {
             e.printStackTrace();

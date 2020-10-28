@@ -16,17 +16,27 @@ import java.util.concurrent.ExecutionException;
  */
 public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     // Variable
-    private HashMap<String, Remote> privateRegistry = new HashMap<>();
-//    private Registry registry = null;
-    private int turn = 1;
+
+    private ArrayList<Remote> machines = new ArrayList<Remote>();
+
+    //private HashMap<String, Remote> privateRegistry = new HashMap<>();
+    //private HashMap<String, Integer> fileCharge = new HashMap<String, Integer>();
+
+    //    private Registry registry = null;
+    //private int turn = 1;
+    private int turn = 0;
     private ArrayList<String> filenames = new ArrayList<String>();
-    private HashMap<String, Integer> fileCharge = new HashMap<String, Integer>();
 
 
     protected Switcher(Registry registry) throws RemoteException {
         super();
     }
 
+
+    @Override
+    public boolean createFile(String filename, byte[] data, String host, int port) throws RemoteException {
+        return false;
+    }
 
     @Override
     public boolean createFile(String filename) throws RemoteException, NotBoundException {
@@ -50,23 +60,38 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * Method of Machine interface
          */
 
-        String mach = this.machineAlive(1);
+        /*String mach = this.machineAlive(1);
         Machine rem = (Machine) this.privateRegistry.get(mach);
-        rem.read(name,host,port);
+        rem.read(name,host,port);*/
+
+        Machine machine = (Machine) this.machineAlive(1);
+        machine.read(name, host, port);
+
     }
 
 
     @Override
-    public void write(String name, byte[] data, String host, int port) throws IOException, NotBoundException {
+    public void write(String filename, byte[] data, String host, int port) throws IOException, NotBoundException {
         /**
          * Write in the document 'name'
          * This method is distributed with RMI, 'Machine' is a remote object
          * Method of Machine interface
          */
-        String mach = this.machineAlive(1);
+
+        /*String mach = this.machineAlive(1);
         Machine rem = (Machine) this.privateRegistry.get(mach);
-        rem.write(name,data, host, port);
-        ;
+        rem.write(name,data, host, port);*/
+
+        Machine machine = (Machine) this.machineAlive(1);
+        if(this.filenames.contains(filename)) {
+            machine.write(filename, data, host, port);
+        }else {
+            machine.createFile(filename, data, host, port);
+            this.filenames.add(filename);
+        }
+
+
+
     }
 
     // =============================================================================================================
@@ -75,26 +100,29 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
     // =============================================================================================================
     @Override
-    public boolean add(String url, Machine machine) throws RemoteException, AlreadyBoundException {
+    public boolean add(Remote machine) throws RemoteException, AlreadyBoundException {
         /**
          * This method add a remote object (Machine) in this.registre
          * Methode of control
          */
-        this.privateRegistry.put(url, machine);
+
+        this.machines.add(machine);
+        //this.privateRegistry.put(url, machine);
 //            this.registry.rebind("rmi://localhost:1099//"  + url, machine);
-        this.fileCharge.put(url,0);
+        //this.fileCharge.put(url,0);
         return true;
     }
 
 
     @Override
-    public boolean remove(String url) throws RemoteException {
+    public boolean remove(Machine machine) throws RemoteException {
         /**
          * This method remove a remote object (Machine) of this.registre
          * Methode of control
          */
         try{
-            this.privateRegistry.remove(url);
+            this.machines.remove(machine);
+            //this.privateRegistry.remove(url);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,11 +132,14 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
 
     @Override
-    public void writeCharge(String name, int charge) throws RemoteException {
+    public void writeCharge(Remote remote, int charge) throws IOException {
         /**
-         * Change a charge of Machine
+         * //Change a charge of Machine
          */
-        this.fileCharge.replace(name,charge);
+        //this.fileCharge.replace(name,charge);
+        Notification machine = (Notification) remote;
+        machine.Charge();
+
     }
     // =============================================================================================================
 
@@ -117,7 +148,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
     @Override
     public void createFileInEachMachine(String filename) throws RemoteException, NotBoundException {
-        ArrayList<String> remoteObjectNames = new ArrayList<>(this.privateRegistry.keySet());
+        /*ArrayList<String> remoteObjectNames = new ArrayList<>(this.privateRegistry.keySet());
 
         for (String remoteObjectName : remoteObjectNames) {
             Remote remoteObject = this.privateRegistry.get(remoteObjectName);
@@ -125,30 +156,41 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
                 Machine machineC = (Machine) remoteObject;
                 machineC.createFile(filename);
             }
+        } */
+
+        for (Remote machine : this.machines){
+            Machine machineC = (Machine) machine;
+            machineC.createFile(filename);
         }
     }
 
 
     // =============================================================================================================
-    public String roundRobin() throws RemoteException {
+    public Notification roundRobin() throws RemoteException {
         /**
          * This method is used for distribute the charge between the machines
          */
-        ArrayList<String> nameListe = new ArrayList<>(this.privateRegistry.keySet());
+        /*ArrayList<String> nameListe = new ArrayList<>(this.privateRegistry.keySet());
         int length = nameListe.size();
         int a = this.turn%(length-1);
         this.turn++;
-        return nameListe.get(a);
+        return nameListe.get(a);*/
 
+        int length = this.machines.size();
+        this.turn = (this.turn+1)%length;
+        //int a = this.turn%(length-1);
+        //this.turn++;
+        //return (Notification) this.machines.get(a);
+        return (Notification) this.machines.get(this.turn);
 
     }
 
 
-    public String lessCharges() throws IOException, NotBoundException {
+    public Notification lessCharges() throws IOException, NotBoundException {
         /**
          * This method find the machine with the less charged.
          */
-        String name = "";
+        /*String name = "";
         int min = -1;
         for(String i : this.privateRegistry.keySet()){
             Notification charged = (Notification) this.privateRegistry.get(i);
@@ -162,18 +204,31 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
             }
         }
 
-        return name;
+        return name;*/
+
+        Remote minRemote = machines.get(0);
+        Notification minMachine = (Notification) minRemote;
+        int minCharge = minMachine.Charge();
+        for (int i = 1; i<this.machines.size(); i++){
+            Remote remote = machines.get(i);
+            Notification machine = (Notification) remote;
+            if  (machine.Charge()< minCharge){
+                minMachine = machine;
+                minCharge = minMachine.Charge();
+            }
+        }
+        return minMachine;
     }
 
 
-    public String machineAlive(int methode) throws IOException, NotBoundException {
+    public Notification machineAlive(int methode) throws IOException, NotBoundException {
         /**
          *  At first they execute a distribute algorithme
          *  If methode = 1 ==> roundRobin
          *  If methode = 2 ==> lessCharges
-         *  For the machine used this method checks whether it is alive, otherwise the machine is remove and the method is rerun.
+         *  For the machine used this method checks whether it is alive, otherwise the machine is removed and the method is rerun.
         */
-        if (methode == 1) { // Round robbin
+        /*if (methode == 1) { // Round robbin
             String url = this.roundRobin();
             try {
                 Notification rem = (Notification) this.privateRegistry.get(url);
@@ -198,7 +253,24 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
                 return url;
             }
         }
-        return "Error";
+        return "Error";*/
+
+        if (methode == 1) { // Round robbin
+            Notification machine = this.roundRobin();
+            //String url = this.roundRobin();
+            if (machine.alive()) {
+                return machine;
+            }
+        }
+        if (methode == 2) {
+            Notification machine = this.lessCharges();
+            if (machine.alive()){
+                return machine;
+            }
+        }
+
+        return null;
+
     }
 
 

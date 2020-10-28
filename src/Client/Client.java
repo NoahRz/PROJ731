@@ -40,18 +40,19 @@ public class Client {
 
 
         try {
-                Remote r = Naming.lookup("rmi:/localhost/Switcher");
-                this.startListen(this.port);
-                if (r instanceof Machine) {
-                    ((Machine) r).read(name, InetAddress.getLocalHost().getHostAddress(), this.port);
-                }
-                this.waitMessage();
-                return this.in.readLine();
-            } catch (NotBoundException | IOException | InterruptedException e) {
-                e.printStackTrace();
-                return "";
+            //Remote r = Naming.lookup("rmi:/localhost/Switcher");
+            Remote r = GlobalConfiguration.switcher;
+            this.startListen(this.port);
+            if (r instanceof Machine) {
+                ((Machine) r).read(name, InetAddress.getLocalHost().getHostAddress(), this.port);
             }
+            this.waitMessage();
+            return this.in.readLine();
+        } catch (NotBoundException | IOException | InterruptedException e) {
+            e.printStackTrace();
+            return "";
         }
+    }
 
     public String write(String name, String data){
         /**
@@ -59,7 +60,8 @@ public class Client {
          */
         System.out.println();
         try {
-            Remote r = Naming.lookup("rmi:/localhost/Switcher");
+            //Remote r = Naming.lookup("rmi:/localhost/Switcher");
+            Remote r = GlobalConfiguration.switcher;
             this.startListen(this.port);
             if (r instanceof Machine) {
                 ((Machine) r).write(name, data.getBytes(), InetAddress.getLocalHost().getHostAddress(), this.port);
@@ -84,8 +86,8 @@ public class Client {
         }
         Client client1 = new Client(port);
 
-        String result = client1.read("ressource_1.txt");
-//        String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
+        //String result = client1.read("ressource_1.txt");
+        String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
         System.out.println(result);
     }
 }
