@@ -12,5 +12,3 @@ COPY Switcher/Controle.java /root/switcher_rmi_docker
 COPY GlobalConfiguration.java /root/switcher_rmi_docker
 
 RUN javac *.java
-
-ENTRYPOINT java Client

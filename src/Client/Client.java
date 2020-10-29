@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -79,13 +78,13 @@ public class Client {
          * Main method
          */
 
-        Console console = System.console();
         int port;
         try{
-             port = Integer.parseInt(console.readLine());
+             port = Integer.parseInt(args[0]);
         }catch (Exception e){
              port = 8080;
         }
+        System.out.println(port);
         Client client1 = new Client(port);
 
         //String result = client1.read("ressource_1.txt");
