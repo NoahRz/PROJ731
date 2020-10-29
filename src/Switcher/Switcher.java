@@ -78,6 +78,12 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * Methode of control
          */
 
+        /*if (this.machines.length !=0) {
+            for (String filename : this.filenames) {
+                File file = this.machines.get(0).getFile(filename);
+                machine.add(file);
+            }
+        }*/
         this.machines.add(machine);
         return true;
     }
