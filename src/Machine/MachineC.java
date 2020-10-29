@@ -70,7 +70,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          */
 
         this.charge++;
-        InputStream read = new BufferedInputStream(new FileInputStream("/root/switcher_rmi_docker/data"));
+        InputStream read = new BufferedInputStream(new FileInputStream(dataPath));
         this.startConnection(host, port);
         this.out.println(new String(read.readAllBytes()));
         this.charge--;
@@ -85,10 +85,10 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
         this.charge++;
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("./src/data/" +filename);
+            FileOutputStream fileOutputStream = new FileOutputStream(dataPath +filename);
             fileOutputStream.write(data);
             this.startConnection(host, port);
-            this.out.println("Modification faite");
+            this.out.println("file " + filename + " modified");
         } catch (Exception ae) {
             ae.printStackTrace();
         }

@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -78,9 +79,10 @@ public class Client {
          * Main method
          */
 
+        Console console = System.console();
         int port;
         try{
-             port = Integer.parseInt(args[0]);
+             port = Integer.parseInt(console.readLine());
         }catch (Exception e){
              port = 8080;
         }
