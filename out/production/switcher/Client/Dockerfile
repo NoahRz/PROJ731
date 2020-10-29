@@ -8,8 +8,7 @@ ENV PATH $PATH:$JAVA_HOME/bin
 
 COPY Client/Client.java /root/switcher_rmi_docker
 COPY Machine/Machine.java /root/switcher_rmi_docker
-COPY Switcher/Controle.java /root/switcher_rmi_docker
-COPY GlobalConfiguration.java /root/switcher_rmi_docker
+COPY Server/Hello.java /root/switcher_rmi_docker
 
 RUN javac *.java
 

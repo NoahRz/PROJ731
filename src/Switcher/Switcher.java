@@ -5,28 +5,27 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+
 
 /**
  * The Switcher class receives requests from clients and distributes them among machines.
  * Thus it is server for client and client for machine.
  */
 public class Switcher extends UnicastRemoteObject implements Machine, Controle {
-    // Variable
-    private HashMap<String, Remote> privateRegistry = new HashMap<>();
-//    private Registry registry = null;
-    private int turn = 1;
+
+    private int turn = 0;
+    private ArrayList<Remote> machines = new ArrayList<Remote>();
     private ArrayList<String> filenames = new ArrayList<String>();
-    private HashMap<String, Integer> fileCharge = new HashMap<String, Integer>();
 
 
-    protected Switcher(Registry registry) throws RemoteException {
+    protected Switcher() throws RemoteException {
         super();
     }
 
+    @Override
+    public boolean createFile(String filename, byte[] data, String host, int port) {
+        return false;
+    }
 
     @Override
     public boolean createFile(String filename) throws RemoteException, NotBoundException {
@@ -39,62 +38,60 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
-
-
     // =============================================================================================================
+
     @Override
-    public void read(String name,String host, int port) throws IOException, NotBoundException, InterruptedException {
+    public void read(String filename,String host, int port) throws IOException, NotBoundException, InterruptedException {
         /**
-         * Read 'name' document document.
+         * Read 'filename' document.
          * This method is distributed with RMI, 'Machine' is a remote object
          * Method of Machine interface
          */
 
-        String mach = this.machineAlive(1);
-        Machine rem = (Machine) this.privateRegistry.get(mach);
-        rem.read(name,host,port);
+        Machine machine = (Machine) this.machineAlive(1);
+        machine.read(filename, host, port);
     }
 
-
     @Override
-    public void write(String name, byte[] data, String host, int port) throws IOException, NotBoundException {
+    public void write(String filename, byte[] data, String host, int port) throws IOException, NotBoundException {
         /**
-         * Write in the document 'name'
+         * Writes in the document 'filename'
          * This method is distributed with RMI, 'Machine' is a remote object
          * Method of Machine interface
          */
-        String mach = this.machineAlive(1);
-        Machine rem = (Machine) this.privateRegistry.get(mach);
-        rem.write(name,data, host, port);
-        ;
+
+        Machine machine = (Machine) this.machineAlive(1);
+        if(this.filenames.contains(filename)) {
+            machine.write(filename, data, host, port);
+        }else {
+            machine.createFile(filename, data, host, port);
+            this.filenames.add(filename);
+        }
     }
 
     // =============================================================================================================
 
-
-
-    // =============================================================================================================
     @Override
-    public boolean add(String url, Machine machine) throws RemoteException, AlreadyBoundException {
+    public boolean add(Remote machine) throws RemoteException, AlreadyBoundException {
         /**
-         * This method add a remote object (Machine) in this.registre
+         * This method adds a remote object (Machine) in the list machines
          * Methode of control
          */
-        this.privateRegistry.put(url, machine);
-//            this.registry.rebind("rmi://localhost:1099//"  + url, machine);
-        this.fileCharge.put(url,0);
+
+        this.machines.add(machine);
         return true;
     }
 
 
     @Override
-    public boolean remove(String url) throws RemoteException {
+    public boolean remove(Machine machine) {
         /**
-         * This method remove a remote object (Machine) of this.registre
+         * This method removes a remote object (Machine) from the list machines
          * Methode of control
          */
+
         try{
-            this.privateRegistry.remove(url);
+            this.machines.remove(machine);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,117 +99,88 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
-
     @Override
-    public void writeCharge(String name, int charge) throws RemoteException {
+    public void writeCharge(Remote remote, int charge) throws IOException { // to change
         /**
-         * Change a charge of Machine
+         * //Change a charge of Machine
          */
-        this.fileCharge.replace(name,charge);
+
+        Notification machine = (Notification) remote;
+        machine.Charge();
     }
+
     // =============================================================================================================
-
-
-
 
     @Override
     public void createFileInEachMachine(String filename) throws RemoteException, NotBoundException {
-        ArrayList<String> remoteObjectNames = new ArrayList<>(this.privateRegistry.keySet());
-
-        for (String remoteObjectName : remoteObjectNames) {
-            Remote remoteObject = this.privateRegistry.get(remoteObjectName);
-            if (remoteObject instanceof Notification) { // it it is a machine
-                Machine machineC = (Machine) remoteObject;
-                machineC.createFile(filename);
-            }
+        for (Remote machine : this.machines){
+            Machine machineC = (Machine) machine;
+            machineC.createFile(filename);
         }
     }
-
 
     // =============================================================================================================
-    public String roundRobin() throws RemoteException {
-        /**
-         * This method is used for distribute the charge between the machines
-         */
-        ArrayList<String> nameListe = new ArrayList<>(this.privateRegistry.keySet());
-        int length = nameListe.size();
-        int a = this.turn%(length-1);
-        this.turn++;
-        return nameListe.get(a);
 
+    public Notification roundRobin() throws RemoteException {
+        /**
+         * This method is used to distribute the charge between machines
+         */
+
+        int length = this.machines.size();
+        this.turn = (this.turn+1)%length;
+        return (Notification) this.machines.get(this.turn);
 
     }
 
-
-    public String lessCharges() throws IOException, NotBoundException {
+    public Notification lessCharges() throws IOException {
         /**
-         * This method find the machine with the less charged.
+         * This method finds the machine which has the lowest charge
          */
-        String name = "";
-        int min = -1;
-        for(String i : this.privateRegistry.keySet()){
-            Notification charged = (Notification) this.privateRegistry.get(i);
-            int valMachine = charged.Charge();
-            if (valMachine > min){
-                min = valMachine;
-                if(min == 0){
-                    return i;
-                }
-                name = i;
+
+        Remote minRemote = machines.get(0);
+        Notification minMachine = (Notification) minRemote;
+        int minCharge = minMachine.Charge();
+        for (int i = 1; i<this.machines.size(); i++){
+            Remote remote = machines.get(i);
+            Notification machine = (Notification) remote;
+            if  (machine.Charge()< minCharge){
+                minMachine = machine;
+                minCharge = minMachine.Charge();
             }
         }
-
-        return name;
+        return minMachine;
     }
 
-
-    public String machineAlive(int methode) throws IOException, NotBoundException {
+    public Notification machineAlive(int methode) throws IOException { // to change (don't understand the purpose)
         /**
          *  At first they execute a distribute algorithme
          *  If methode = 1 ==> roundRobin
          *  If methode = 2 ==> lessCharges
-         *  For the machine used this method checks whether it is alive, otherwise the machine is remove and the method is rerun.
+         *  For the machine used this method checks whether it is alive, otherwise the machine is removed and the method is rerun.
         */
+
         if (methode == 1) { // Round robbin
-            String url = this.roundRobin();
-            try {
-                Notification rem = (Notification) this.privateRegistry.get(url);
-                rem.alive();
-                return url;
-            } catch (IOException e) {
-                this.privateRegistry.get(url);
-                url = this.roundRobin();
-                this.machineAlive(methode);
-                return url;
-            }
-        } else if ( methode == 2) { // according to machine charges
-            String url = this.lessCharges();
-            try {
-                Notification rem = (Notification) this.privateRegistry.get(url);
-                rem.alive();
-                return url;
-            } catch (IOException e) {
-                this.privateRegistry.get(url);
-                url = this.lessCharges();
-                this.machineAlive(methode);
-                return url;
+            Notification machine = this.roundRobin();
+            if (machine.alive()) {
+                return machine;
             }
         }
-        return "Error";
+        if (methode == 2) {
+            Notification machine = this.lessCharges();
+            if (machine.alive()){
+                return machine;
+            }
+        }
+        return null;
     }
 
-
-
     // ---------------------------------------------------------------------------------------------
+
     public static void main(String[] args) {
         try {
-
-            //Registry registry = LocateRegistry.createRegistry(1099);
-            // did this because still got the error : java.rmi.UnmarshalException: error unmarshalling arguments
-
             Registry registry = LocateRegistry.getRegistry();
 
-            Switcher switcher = new Switcher(registry);
+            Switcher switcher = new Switcher();
 
             String url = "rmi:/localhost/Switcher";
             Naming.rebind(url, switcher);
