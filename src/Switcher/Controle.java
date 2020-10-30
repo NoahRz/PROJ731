@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 
 
 public interface Controle extends Remote{
-    boolean add(Remote machine) throws RemoteException, AlreadyBoundException;
+    boolean add(Remote machine) throws IOException, AlreadyBoundException;
     boolean remove(Machine machine) throws RemoteException;
     void writeCharge(Remote machine, int charge) throws IOException;
 

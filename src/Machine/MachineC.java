@@ -13,7 +13,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     private PrintWriter out;
     private int charge = 0;
     private Remote switcher = null;
-    private final String dataPath = "/root/switcher_rmi_docker/data/";
+    private final String dataPath = "./data/";
 
     public MachineC() throws IOException, NotBoundException, AlreadyBoundException {
         super();
@@ -95,6 +95,25 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         this.charge--;
     }
 
+    @Override
+    public File getFile(String filename) { // try { } catch { } ??
+        File file = new File(dataPath + filename);
+        return file;
+    }
+
+    @Override
+    public boolean add(File file) throws IOException {
+        System.out.println(file.getPath());
+        File file1 = new File(file.getPath());
+        file1.createNewFile();
+        /*if (file.createNewFile()){
+            return true;
+        } else {
+            return false;
+        }*/
+        return true;
+    }
+
     // =============================================================================================================
 
     public void launch() throws IOException, AlreadyBoundException {
@@ -103,8 +122,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          */
 
         if (switcher instanceof Controle) {
-            boolean s = ((Controle) switcher).add(this);
             this.createDirectory();
+            boolean s = ((Controle) switcher).add(this);
             System.out.println(s);
         }
     }

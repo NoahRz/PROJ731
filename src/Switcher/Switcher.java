@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.*;
@@ -69,23 +70,37 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
+    @Override
+    public File getFile(String filename) {
+        return null;
+    }
+
+    @Override
+    public boolean add(File file) throws IOException {
+        return false;
+    }
+
     // =============================================================================================================
 
     @Override
-    public boolean add(Remote machine) throws RemoteException, AlreadyBoundException {
+    public boolean add(Remote machine) throws IOException {
         /**
          * This method adds a remote object (Machine) in the list machines
          * Methode of control
          */
 
-        /*if (this.machines.length !=0) {
-            for (String filename : this.filenames) {
-                File file = this.machines.get(0).getFile(filename);
-                machine.add(file);
-            }
-        }*/
+        this.addFilesTo((Machine) machine);
         this.machines.add(machine);
         return true;
+    }
+
+    public void addFilesTo(Machine machine) throws IOException {
+        for (String filename : this.filenames) {
+            Machine machine1 = (Machine)this.machines.get(0);
+            File file = machine1.getFile(filename);
+            System.out.println(file.getPath());
+            machine.add(file);
+        }
     }
 
 

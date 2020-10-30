@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -16,4 +17,8 @@ public interface Machine extends Remote{
     void read(String filename, String host, int port) throws IOException, NotBoundException, InterruptedException;
 
     void write(String filename, byte[] data, String host, int port) throws IOException, NotBoundException;
+
+    File getFile(String filename) throws RemoteException;
+
+    boolean add(File file) throws IOException, RemoteException;
 }
