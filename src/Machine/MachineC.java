@@ -21,7 +21,26 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         this.launch();
     }
 
-    // =============================================================================================================
+    public void launch() throws IOException, AlreadyBoundException {
+        /**
+         * Add the machine to Switcher machines list
+         */
+
+        if (switcher instanceof Controle) {
+            this.createDirectory();
+            boolean s = ((Controle) switcher).add(this);
+            System.out.println(s);
+        }
+    }
+
+    public void createDirectory() {
+        try {
+            Path path = Paths.get(dataPath);
+            Files.createDirectory(path);
+        } catch (Exception e){
+            ;
+        }
+    }
 
     public void startConnection(String ip, int port) throws IOException {
         /**
@@ -32,13 +51,12 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         out = new PrintWriter(clientSocket.getOutputStream(), true);
     }
 
-    // =============================================================================================================
-
     public boolean createFile(String filename, byte[] data, String host, int port) { // RemoteException useless ?
         try {
             File file = new File(dataPath+ filename);
             if (file.createNewFile()) {
                 System.out.println("File created: " + file.getName());
+                this.write(filename, data);
                 this.startConnection(host, port);
                 this.out.println("File "+ file.getName() + " created");
                 return true;
@@ -52,15 +70,22 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         }
         return false;
     }
+    public Boolean write(String filename, byte[] data) {
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(dataPath + filename);
+            fileOutputStream.write(data);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-    // =============================================================================================================
 
     @Override
     public boolean createFile(String filename) {
         return false;
     }
-
-    // =============================================================================================================
 
     @Override
     public void read(String filename, String host, int port) throws IOException { // to change
@@ -85,8 +110,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
 
         this.charge++;
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(dataPath +filename);
-            fileOutputStream.write(data);
+            this.write(filename, data);
             this.startConnection(host, port);
             this.out.println("file " + filename + " modified");
         } catch (Exception ae) {
@@ -106,29 +130,33 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         System.out.println(file.getPath());
         File file1 = new File(file.getPath());
         file1.createNewFile();
-        /*if (file.createNewFile()){
-            return true;
-        } else {
-            return false;
-        }*/
+        this.copy(file, file1);
         return true;
     }
 
-    // =============================================================================================================
-
-    public void launch() throws IOException, AlreadyBoundException {
-        /**
-         * Add the machine to Switcher machines list
-         */
-
-        if (switcher instanceof Controle) {
-            this.createDirectory();
-            boolean s = ((Controle) switcher).add(this);
-            System.out.println(s);
+    public void copy(File fileSrc, File fileDest ) throws IOException {
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            inputStream = new FileInputStream(fileSrc);
+            outputStream = new FileOutputStream(fileDest); // buffer size 1K
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            inputStream.close();
+            outputStream.close();
         }
     }
 
-    // =============================================================================================================
+
+
     @Override
     public Boolean alive() { // to change (why wouldn't be it alive ?)
         /**
@@ -138,22 +166,11 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         return true;
     }
 
-    public void createDirectory() {
-        try {
-            Path path = Paths.get(dataPath);
-            Files.createDirectory(path);
-        } catch (Exception e){
-            ;
-        }
-    }
-
-    // =============================================================================================================
-
     public void checkOut() throws RemoteException {
         ((Controle) switcher).remove(this);
     }
 
-    public static void copy(File pathOfFileToCopy, File pathOfFileWhereToPaste) throws IOException { // amybe should use the Apache IO method
+    /*public static void copy(File pathOfFileToCopy, File pathOfFileWhereToPaste) throws IOException { // amybe should use the Apache IO method
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
@@ -168,7 +185,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             inputStream.close();
             outputStream.close();
         }
-    }
+    }*/
 
     @Override
     public int Charge() {
@@ -196,6 +213,8 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             }
         }
     }
+
+
 
     public static void main(String[] args) {
         try {

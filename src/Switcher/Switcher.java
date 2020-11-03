@@ -24,6 +24,32 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     }
 
     @Override
+    public boolean add(Remote machine) throws IOException {
+        /**
+         * This method adds a remote object (Machine) in the list machines
+         * Methode of control
+         */
+
+        this.copyFilesTo((Machine) machine);
+        this.machines.add(machine);
+        return true;
+    }
+
+    public void copyFilesTo(Machine machine) throws IOException {
+        /**
+         * copy files from machine 0 to machine
+         * */
+        if(this.machines.size() != 0) {
+            Machine machine0 = (Machine) this.machines.get(0);
+            for (String filename : this.filenames) {
+                File file = machine0.getFile(filename);
+                System.out.println(file.getPath());
+                machine.add(file);
+            }
+        }
+    }
+
+    @Override
     public boolean createFile(String filename, byte[] data, String host, int port) {
         return false;
     }
@@ -39,7 +65,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
-    // =============================================================================================================
 
     @Override
     public void read(String filename,String host, int port) throws IOException, NotBoundException, InterruptedException {
@@ -80,29 +105,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         return false;
     }
 
-    // =============================================================================================================
-
-    @Override
-    public boolean add(Remote machine) throws IOException {
-        /**
-         * This method adds a remote object (Machine) in the list machines
-         * Methode of control
-         */
-
-        this.addFilesTo((Machine) machine);
-        this.machines.add(machine);
-        return true;
-    }
-
-    public void addFilesTo(Machine machine) throws IOException {
-        for (String filename : this.filenames) {
-            Machine machine1 = (Machine)this.machines.get(0);
-            File file = machine1.getFile(filename);
-            System.out.println(file.getPath());
-            machine.add(file);
-        }
-    }
-
 
     @Override
     public boolean remove(Machine machine) {
@@ -130,7 +132,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         machine.Charge();
     }
 
-    // =============================================================================================================
 
     @Override
     public void createFileInEachMachine(String filename) throws RemoteException, NotBoundException {
@@ -140,7 +141,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         }
     }
 
-    // =============================================================================================================
 
     public Notification roundRobin() throws RemoteException {
         /**
@@ -195,7 +195,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         return null;
     }
 
-    // ---------------------------------------------------------------------------------------------
 
     public static void main(String[] args) {
         try {

@@ -53,7 +53,7 @@ public class Client {
         }
     }
 
-    public String write(String name, String data){
+    public String write(String filename, String data){
         /**
          * Method to write
          */
@@ -63,7 +63,7 @@ public class Client {
             Remote r = GlobalConfiguration.switcher;
             this.startListen(this.port);
             if (r instanceof Machine) {
-                ((Machine) r).write(name, data.getBytes(), InetAddress.getLocalHost().getHostAddress(), this.port);
+                ((Machine) r).write(filename, data.getBytes(), InetAddress.getLocalHost().getHostAddress(), this.port);
             }
             this.waitMessage();
             return this.in.readLine();
@@ -79,16 +79,53 @@ public class Client {
          */
 
         int port;
+        String action;
+        String filename;
+        String data;
+
         try{
              port = Integer.parseInt(args[0]);
         }catch (Exception e){
              port = 8080;
         }
+
+        try{
+            action = args[1]; // read or write
+        } catch (Exception e){
+            action = "";
+        }
+        try{
+            filename = args[2];
+        } catch (Exception e){
+            filename = "";
+        }
+
+        try {
+            data = args[3];
+        } catch (Exception e){
+            data = "";
+        }
+
         System.out.println(port);
-        Client client1 = new Client(port);
+
+        Client client = new Client(port);
+
+        String result = "none";
+        if (action.equals("read")){
+            if(!filename.equals("")){
+                result = client.read(filename);
+            }
+        }
+        if (action.equals("write")){
+            if(!filename.equals("")){
+                if(!filename.equals("")){
+                    result = client.write(filename, data);
+                }
+            }
+        }
 
         //String result = client1.read("ressource_1.txt");
-        String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
+        //String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
         System.out.println(result);
     }
 }
