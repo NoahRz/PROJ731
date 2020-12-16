@@ -18,8 +18,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private int turn = 0;
     private ArrayList<Remote> machines = new ArrayList<Remote>();
     private ArrayList<String> filenames = new ArrayList<String>();
-
-
+    
     protected Switcher() throws RemoteException {
         super();
     }

@@ -74,7 +74,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(dataPath + filename);
             fileOutputStream.write(data);
-            System.out.println(("file writted"));
+            System.out.println(("file written"));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
