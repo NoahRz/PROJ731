@@ -18,7 +18,14 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private int turn = 0;
     private ArrayList<Remote> machines = new ArrayList<Remote>();
     private ArrayList<String> filenames = new ArrayList<String>();
-    
+
+    // liste de hasmap {filename, semaphore, semaphore_lecture, nbLecture }
+    // semaphore init à 1
+    // semaphore_lecture init à 1
+    // nbLecture init à 0
+
+    // un thread pour écriture et un tread pour lecture
+
     protected Switcher() throws RemoteException {
         super();
     }
