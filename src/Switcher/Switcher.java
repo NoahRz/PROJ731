@@ -43,9 +43,8 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         if(this.machines.size() != 0) {
             Machine machine0 = (Machine) this.machines.get(0);
             for (String filename : this.filenames) {
-                File file = machine0.getFile(filename);
-                System.out.println(file.getPath());
-                machine.add(file);
+                byte[] contentFile = machine0.getContentFile(filename);
+                machine.add(filename, contentFile);
             }
         }
     }
@@ -87,7 +86,6 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * Method of Machine interface
          */
 
-        //Machine machine = (Machine) this.machineAlive(1);
         if(this.filenames.contains(filename)) {
             for (Remote machine : this.machines){ // we create the file in all machines alive
                 Machine machine1 = (Machine) machine;
@@ -103,12 +101,12 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     }
 
     @Override
-    public File getFile(String filename) {
+    public byte[] getContentFile(String filename) throws RemoteException {
         return null;
     }
 
     @Override
-    public boolean add(File file) throws IOException {
+    public boolean add(String filename, byte[] contentFile) throws IOException, RemoteException {
         return false;
     }
 

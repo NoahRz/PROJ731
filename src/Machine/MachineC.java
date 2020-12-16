@@ -74,6 +74,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(dataPath + filename);
             fileOutputStream.write(data);
+            System.out.println(("file writted"));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,43 +120,23 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         this.charge--;
     }
 
-    @Override
-    public File getFile(String filename) { // try { } catch { } ??
-        File file = new File(dataPath + filename);
-        return file;
-    }
 
     @Override
-    public boolean add(File file) throws IOException {
-        System.out.println(file.getPath());
-        File file1 = new File(file.getPath());
-        file1.createNewFile();
-        this.copy(file, file1);
-        return true;
-    }
-
-    public void copy(File fileSrc, File fileDest ) throws IOException {
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
+    public byte[] getContentFile(String filename) throws RemoteException {
+        String filePath = dataPath + filename;
+        byte[] content = new byte[0];
         try {
-            inputStream = new FileInputStream(fileSrc);
-            outputStream = new FileOutputStream(fileDest); // buffer size 1K
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) > 0) {
-                System.out.println(bytesRead);
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            content =  Files.readAllBytes( Paths.get(filePath) ) ;
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            inputStream.close();
-            outputStream.close();
         }
+        return content;
     }
 
+    @Override
+    public boolean add(String filename, byte[] contentFile) throws IOException, RemoteException {
+        return this.write(filename, contentFile);
+    }
 
     @Override
     public Boolean alive() { // to change (why wouldn't be it alive ?)
@@ -169,23 +150,6 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     public void checkOut() throws RemoteException {
         ((Controle) switcher).remove(this);
     }
-
-    /*public static void copy(File pathOfFileToCopy, File pathOfFileWhereToPaste) throws IOException { // amybe should use the Apache IO method
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        try {
-            inputStream = new FileInputStream(pathOfFileToCopy);
-            outputStream = new FileOutputStream(pathOfFileWhereToPaste); // buffer size 1K
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        } finally {
-            inputStream.close();
-            outputStream.close();
-        }
-    }*/
 
     @Override
     public int Charge() {

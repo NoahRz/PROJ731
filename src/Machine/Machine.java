@@ -18,7 +18,7 @@ public interface Machine extends Remote{
 
     void write(String filename, byte[] data, String host, int port) throws IOException, NotBoundException;
 
-    File getFile(String filename) throws RemoteException;
+    byte[] getContentFile(String filename) throws RemoteException;
 
-    boolean add(File file) throws IOException, RemoteException;
+    boolean add(String filename, byte[] contentFile) throws IOException, RemoteException;
 }
