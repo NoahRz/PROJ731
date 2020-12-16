@@ -96,7 +96,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
          */
 
         this.charge++;
-        InputStream read = new BufferedInputStream(new FileInputStream(dataPath));
+        InputStream read = new BufferedInputStream(new FileInputStream(dataPath + filename));
         this.startConnection(host, port);
         this.out.println(new String(read.readAllBytes()));
         this.charge--;
