@@ -1,3 +1,4 @@
+import javax.crypto.Mac;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -86,11 +87,17 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * Method of Machine interface
          */
 
-        Machine machine = (Machine) this.machineAlive(1);
+        //Machine machine = (Machine) this.machineAlive(1);
         if(this.filenames.contains(filename)) {
-            machine.write(filename, data, host, port);
+            for (Remote machine : this.machines){ // we create the file in all machines alive
+                Machine machine1 = (Machine) machine;
+                machine1.write(filename, data, host, port);
+            }
         }else {
-            machine.createFile(filename, data, host, port);
+            for (Remote machine : this.machines){ // we create the file in all machines alive
+                Machine machine1 = (Machine) machine;
+                machine1.createFile(filename, data, host, port);
+            }
             this.filenames.add(filename);
         }
     }
@@ -174,7 +181,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
 
     public Notification machineAlive(int methode) throws IOException { // to change (don't understand the purpose)
         /**
-         *  At first they execute a distribute algorithme
+         *  At first they execute a distribute algorithm
          *  If methode = 1 ==> roundRobin
          *  If methode = 2 ==> lessCharges
          *  For the machine used this method checks whether it is alive, otherwise the machine is removed and the method is rerun.

@@ -29,7 +29,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
         if (switcher instanceof Controle) {
             this.createDirectory();
             boolean s = ((Controle) switcher).add(this);
-            System.out.println(s);
+            System.out.println("machine added to switcher : " + s);
         }
     }
 
@@ -143,6 +143,7 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) > 0) {
+                System.out.println(bytesRead);
                 outputStream.write(buffer, 0, bytesRead);
             }
         } catch (FileNotFoundException e) {
@@ -154,7 +155,6 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
             outputStream.close();
         }
     }
-
 
 
     @Override

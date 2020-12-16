@@ -106,7 +106,7 @@ public class Client {
             data = "";
         }
 
-        System.out.println(port);
+        System.out.println("port :" + port);
 
         Client client = new Client(port);
 
