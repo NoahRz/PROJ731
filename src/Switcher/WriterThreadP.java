@@ -1,11 +1,11 @@
 import java.util.concurrent.Semaphore;
 
-public class WriterThread extends Thread {
+public class WriterThreadP extends Thread {
 
     Semaphore semaphore;
     String threadName;
 
-    public WriterThread(Semaphore semaphore, String threadName){
+    public WriterThreadP(Semaphore semaphore, String threadName){
         super(threadName);
         this.semaphore = semaphore;
     }
@@ -23,6 +23,8 @@ public class WriterThread extends Thread {
             System.out.println(threadName + " gets a permit.");
 
             // Now, accessing the shared resource.
+
+            // here, we write on the file
 
 
         } catch (InterruptedException exc) {

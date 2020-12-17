@@ -7,6 +7,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -18,6 +19,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private int turn = 0;
     private ArrayList<Remote> machines = new ArrayList<Remote>();
     private ArrayList<String> filenames = new ArrayList<String>();
+    private ArrayList<HashMap<String, SwitcherSemaphore>> filesnames_semaphore = new ArrayList<>();
 
     // liste de hasmap {filename, semaphore, semaphore_lecture, nbLecture }
     // semaphore init à 1
@@ -79,9 +81,12 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          * This method is distributed with RMI, 'Machine' is a remote object
          * Method of Machine interface
          */
-
-        Machine machine = (Machine) this.machineAlive(1);
-        machine.read(filename, host, port);
+        if(this.filenames.contains(filename)) {
+            Machine machine = (Machine) this.machineAlive(1);
+            // <-- we take the semaphore (P)
+            machine.read(filename, host, port);
+            // <-- we release the semaphore (V)
+        }
     }
 
     @Override
@@ -93,16 +98,21 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
          */
 
         if(this.filenames.contains(filename)) {
-            for (Remote machine : this.machines){ // we create the file in all machines alive
+            for (Remote machine : this.machines){ // we write the file in all machines alive
                 Machine machine1 = (Machine) machine;
+                // <-- we take the semaphore (P)
                 machine1.write(filename, data, host, port);
+                // <-- we release the semaphore (V)
             }
         }else {
+            this.filenames.add(filename);
             for (Remote machine : this.machines){ // we create the file in all machines alive
                 Machine machine1 = (Machine) machine;
+                // <-- we take the semaphore (P)
                 machine1.createFile(filename, data, host, port);
+                // <-- we release the semaphore (V)
             }
-            this.filenames.add(filename);
+
         }
     }
 

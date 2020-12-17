@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.*;
+import java.util.Scanner;
 
 public class Client {
 
@@ -118,10 +119,14 @@ public class Client {
         }
         if (action.equals("write")){
             if(!filename.equals("")){
-                if(!filename.equals("")){
-                    result = client.write(filename, data);
-                }
+                Scanner myObj = new Scanner(System.in);
+
+                System.out.println("Enter some content :");
+                data = myObj.nextLine();
+
+                result = client.write(filename, data);
             }
+
         }
 
         //String result = client1.read("ressource_1.txt");

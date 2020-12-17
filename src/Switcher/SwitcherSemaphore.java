@@ -11,14 +11,26 @@ public class SwitcherSemaphore {
 
     }
 
-    public void reading() {
-        ReaderThread reader = new ReaderThread(readingSem, "reader");
+    public void readingP() {
+        ReaderThreadP reader = new ReaderThreadP(readingSem, "reader");
 
         reader.start();
     }
 
-    public void writing() {
-        WriterThread writer = new WriterThread(writingSem, "reader");
+    public void readingV() {
+        ReaderThreadV reader = new ReaderThreadV(readingSem, "reader");
+
+        reader.start();
+    }
+
+    public void writingP() {
+        WriterThreadV writer = new WriterThreadV(writingSem, "reader");
+
+        writer.start();
+    }
+
+    public void writingV() {
+        WriterThreadV writer = new WriterThreadV(writingSem, "reader");
 
         writer.start();
     }

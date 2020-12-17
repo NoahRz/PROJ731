@@ -1,12 +1,12 @@
 import java.util.concurrent.Semaphore;
 
-public class ReaderThread extends Thread {
+public class ReaderThreadP extends Thread {
 
     Semaphore semaphore;
     String threadName;
 
 
-    public ReaderThread(Semaphore semaphore, String threadName){
+    public ReaderThreadP(Semaphore semaphore, String threadName){
         super(threadName);
         this.semaphore = semaphore;
     }
