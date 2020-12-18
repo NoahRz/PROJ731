@@ -38,3 +38,11 @@ Once inside the client container you can :
 * Write a new file or an existing file : ```java Client <port_number> write <filename>```
 * Read an existing file : ```java Client <port_number> read <filename> ```
   
+## Switcher view
+![alt text](https://github.com/NoahRz/switcher/blob/main/readMe_images/switcherView.png "switcherView")
+
+## Machine view
+![alt text](https://github.com/NoahRz/switcher/blob/main/readMe_images/machineView.png "machineView")
+
+## Client view
+![alt text](https://github.com/NoahRz/switcher/blob/main/readMe_images/clientView.png "clientView")
