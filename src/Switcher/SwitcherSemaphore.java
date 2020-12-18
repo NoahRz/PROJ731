@@ -5,6 +5,7 @@ public class SwitcherSemaphore {
     private Semaphore writingSem;
     private Semaphore readingSem;
     private String filename;
+    private int nbLecteur = 0;
 
 
     public SwitcherSemaphore(String filename) {
@@ -18,18 +19,33 @@ public class SwitcherSemaphore {
     }
 
     public void readingP() throws InterruptedException {
-        ReaderThreadP reader = new ReaderThreadP(readingSem, "reader " + filename);
+        ReaderThreadP readerP = new ReaderThreadP(readingSem, "reader " + filename);
+        readerP.start();
+        readerP.join(); // waiting for the thread
 
-        reader.start();
+        nbLecteur = nbLecteur + 1;
+        if(nbLecteur == 1){
+            this.writingP();
+        }
+        ReaderThreadP readerV = new ReaderThreadP(readingSem, "reader " + filename);
+        readerV.start();
+        readerV.join();
 
-        reader.join(); // waiting for the thread
     }
 
     public void readingV() throws InterruptedException {
-        ReaderThreadV reader = new ReaderThreadV(readingSem, "reader " + filename);
+        ReaderThreadP readerP = new ReaderThreadP(readingSem, "reader " + filename);
+        readerP.start();
+        readerP.join(); // waiting for the thread
 
-        reader.start();
-        reader.join(); // waiting for the thread
+        nbLecteur = nbLecteur - 1;
+        if(nbLecteur == 0){
+            this.writingV();
+        }
+
+        ReaderThreadP readerV = new ReaderThreadP(readingSem, "reader " + filename);
+        readerV.start();
+        readerV.join();
     }
 
     public void writingP() throws InterruptedException {

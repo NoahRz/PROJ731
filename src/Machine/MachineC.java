@@ -149,6 +149,16 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     }
 
     @Override
+    public void openReading(String filename) throws RemoteException, InterruptedException {
+
+    }
+
+    @Override
+    public void closeReading(String filename) throws RemoteException, InterruptedException {
+
+    }
+
+    @Override
     public Boolean alive() { // to change (why wouldn't be it alive ?)
         /**
          * This method notifies if it is a life

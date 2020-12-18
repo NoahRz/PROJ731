@@ -25,4 +25,8 @@ public interface Machine extends Remote{
     void openWriting(String filename) throws RemoteException, InterruptedException;
 
     void closeWriting(String filename) throws RemoteException, InterruptedException;;
+
+    void openReading(String filename) throws RemoteException, InterruptedException;
+
+    void closeReading(String filename)throws RemoteException, InterruptedException;
 }

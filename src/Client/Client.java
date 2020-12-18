@@ -93,6 +93,26 @@ public class Client {
         return false;
     }
 
+    public Boolean openReading(String filename) throws RemoteException, InterruptedException {
+        Remote r = GlobalConfiguration.switcher;
+        if (r instanceof Machine) {
+            ((Machine) r).openReading(filename);
+            return true;
+        }
+        return false;
+
+    }
+
+    public Boolean closeReading(String filename) throws RemoteException, InterruptedException {
+        Remote r = GlobalConfiguration.switcher;
+        if (r instanceof Machine) {
+            ((Machine) r).closeReading(filename);
+            System.out.println("close reading");
+            return true;
+        }
+        return false;
+    }
+
     public static void main(String[] args) throws RemoteException, InterruptedException {
         /**
          * Main method
@@ -134,8 +154,10 @@ public class Client {
         if (action.equals("read")){
             if(!filename.equals("")){
                 // <-- we take the semaphore (P)
+                client.openReading(filename);
                 result = client.read(filename);
                 // <-- we release the semaphore (V)
+                client.closeReading(filename);
             }
         }
         if (action.equals("write")){

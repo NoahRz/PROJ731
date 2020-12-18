@@ -144,6 +144,22 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
         semaphore.writingV();
     }
 
+    @Override
+    public void openReading(String filename) throws RemoteException, InterruptedException {
+        if(this.filenames.contains(filename)) {
+            SwitcherSemaphore semaphore = this.getSemaphoreOf(filename);
+            semaphore.readingP();
+        }
+    }
+
+    @Override
+    public void closeReading(String filename) throws RemoteException, InterruptedException {
+        if(this.filenames.contains(filename)) {
+            SwitcherSemaphore semaphore = this.getSemaphoreOf(filename);
+            semaphore.readingV();
+        }
+    }
+
     private SwitcherSemaphore getSemaphoreOf(String filename) {
         for (SwitcherSemaphore semaphore : this.semaphores){
             if (semaphore.getFilename().equals(filename)){
