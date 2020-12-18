@@ -19,7 +19,7 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     private int turn = 0;
     private ArrayList<Remote> machines = new ArrayList<Remote>();
     private ArrayList<String> filenames = new ArrayList<String>();
-    private ArrayList<HashMap<String, SwitcherSemaphore>> filesnames_semaphore = new ArrayList<>();
+    private ArrayList<SwitcherSemaphore> semaphores = new ArrayList<>();
 
     // liste de hasmap {filename, semaphore, semaphore_lecture, nbLecture }
     // semaphore init à 1
@@ -124,6 +124,33 @@ public class Switcher extends UnicastRemoteObject implements Machine, Controle {
     @Override
     public boolean add(String filename, byte[] contentFile) throws IOException, RemoteException {
         return false;
+    }
+
+    @Override
+    public void openWriting(String filename) throws RemoteException, InterruptedException {
+        if(this.filenames.contains(filename)) {
+            SwitcherSemaphore semaphore = this.getSemaphoreOf(filename);
+            semaphore.writingP();
+        }else {
+            SwitcherSemaphore semaphore = new SwitcherSemaphore(filename);
+            this.semaphores.add(semaphore);
+            semaphore.writingP();
+        }
+    }
+
+    @Override
+    public void closeWriting(String filename) throws RemoteException, InterruptedException {
+        SwitcherSemaphore semaphore = this.getSemaphoreOf(filename);
+        semaphore.writingV();
+    }
+
+    private SwitcherSemaphore getSemaphoreOf(String filename) {
+        for (SwitcherSemaphore semaphore : this.semaphores){
+            if (semaphore.getFilename().equals(filename)){
+                return semaphore;
+            }
+        }
+        return null;
     }
 
 

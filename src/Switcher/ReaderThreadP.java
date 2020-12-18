@@ -9,6 +9,7 @@ public class ReaderThreadP extends Thread {
     public ReaderThreadP(Semaphore semaphore, String threadName){
         super(threadName);
         this.semaphore = semaphore;
+        this.threadName = threadName;
     }
 
     public void run() {

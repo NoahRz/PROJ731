@@ -8,6 +8,7 @@ public class WriterThreadV extends Thread {
     public WriterThreadV(Semaphore semaphore, String threadName){
         super(threadName);
         this.semaphore = semaphore;
+        this.threadName = threadName;
     }
 
     public void run() {

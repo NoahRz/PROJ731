@@ -21,4 +21,8 @@ public interface Machine extends Remote{
     byte[] getContentFile(String filename) throws RemoteException;
 
     boolean add(String filename, byte[] contentFile) throws IOException, RemoteException;
+
+    void openWriting(String filename) throws RemoteException, InterruptedException;
+
+    void closeWriting(String filename) throws RemoteException, InterruptedException;;
 }

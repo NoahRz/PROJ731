@@ -8,6 +8,7 @@ public class WriterThreadP extends Thread {
     public WriterThreadP(Semaphore semaphore, String threadName){
         super(threadName);
         this.semaphore = semaphore;
+        this.threadName = threadName;
     }
 
     public void run() {
@@ -31,8 +32,8 @@ public class WriterThreadP extends Thread {
             System.out.println(exc);
         }
 
-        // Release the permit.
-        System.out.println(threadName + " releases the permit.");
-        semaphore.release();
+//        // Release the permit.
+//        System.out.println(threadName + " releases the permit.");
+//        semaphore.release();
     }
 }

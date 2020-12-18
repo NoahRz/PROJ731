@@ -7,6 +7,11 @@ ENV JAVA_HOME /usr/lib/jvm/default-jvm/
 ENV PATH $PATH:$JAVA_HOME/bin
 
 COPY Switcher/Switcher.java /root/switcher_rmi_docker
+COPY Switcher/SwitcherSemaphore.java /root/switcher_rmi_docker
+COPY Switcher/WriterThreadP.java /root/switcher_rmi_docker
+COPY Switcher/WriterThreadV.java /root/switcher_rmi_docker
+COPY Switcher/ReaderThreadP.java /root/switcher_rmi_docker
+COPY Switcher/ReaderThreadV.java /root/switcher_rmi_docker
 COPY Machine/Machine.java /root/switcher_rmi_docker
 COPY Switcher/Controle.java /root/switcher_rmi_docker
 COPY Machine/Notification.java /root/switcher_rmi_docker

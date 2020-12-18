@@ -139,6 +139,16 @@ public class MachineC extends UnicastRemoteObject implements Machine, Notificati
     }
 
     @Override
+    public void openWriting(String filename) throws RemoteException {
+
+    }
+
+    @Override
+    public void closeWriting(String filename) throws RemoteException {
+
+    }
+
+    @Override
     public Boolean alive() { // to change (why wouldn't be it alive ?)
         /**
          * This method notifies if it is a life

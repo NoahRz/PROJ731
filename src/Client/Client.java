@@ -74,7 +74,26 @@ public class Client {
         }
     }
 
-    public static void main(String[] args) {
+    public Boolean openWriting(String filename) throws RemoteException, InterruptedException {
+        Remote r = GlobalConfiguration.switcher;
+        if (r instanceof Machine) {
+            ((Machine) r).openWriting(filename);
+            return true;
+        }
+        return false;
+
+    }
+
+    public Boolean closeWriting(String filename) throws RemoteException, InterruptedException {
+        Remote r = GlobalConfiguration.switcher;
+        if (r instanceof Machine) {
+            ((Machine) r).closeWriting(filename);
+            return true;
+        }
+        return false;
+    }
+
+    public static void main(String[] args) throws RemoteException, InterruptedException {
         /**
          * Main method
          */
@@ -114,17 +133,23 @@ public class Client {
         String result = "none";
         if (action.equals("read")){
             if(!filename.equals("")){
+                // <-- we take the semaphore (P)
                 result = client.read(filename);
+                // <-- we release the semaphore (V)
             }
         }
         if (action.equals("write")){
             if(!filename.equals("")){
                 Scanner myObj = new Scanner(System.in);
-
+                // <-- we take the semaphore (P)
+                System.out.println(client.openWriting(filename));
                 System.out.println("Enter some content :");
                 data = myObj.nextLine();
 
                 result = client.write(filename, data);
+                // <-- we release the semaphore (V)
+                System.out.println(client.closeWriting(filename));
+
             }
 
         }
@@ -133,5 +158,9 @@ public class Client {
         //String result = client1.write("ressource_1.txt", "Bonjour je suis un nouveau texte");
         System.out.println(result);
     }
+
+
+
+
 }
 
